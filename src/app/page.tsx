@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Code, Palette, Camera, FileText } from "lucide-react";
+import { ArrowRight, Code, Palette, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { site } from "../../site.config";
-import { getAllProjects, getAllArtwork, getAllPhotos } from "@/lib/content";
+import { getAllProjects, getAllWorks } from "@/lib/content";
 
 const quickLinks = [
   {
@@ -19,23 +19,16 @@ const quickLinks = [
     icon: FileText,
   },
   {
-    href: "/art",
-    title: "Digital Art",
-    description: "Illustrations, 3D renders, and creative works",
+    href: "/works",
+    title: "Creative Works",
+    description: "Digital art, UE5 projects, and interactive media",
     icon: Palette,
-  },
-  {
-    href: "/photo",
-    title: "Photography",
-    description: "Portrait and landscape photography",
-    icon: Camera,
   },
 ];
 
 export default function HomePage() {
   const projects = getAllProjects().slice(0, 3);
-  const artwork = getAllArtwork().slice(0, 2);
-  const photos = getAllPhotos().slice(0, 2);
+  const works = getAllWorks().slice(0, 4);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -126,71 +119,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Art & Photography */}
+      {/* Featured Works */}
       <section>
         <div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Art */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Latest Art</h2>
-                <Link
-                  href="/art"
-                  className="flex items-center text-accent hover:underline"
-                >
-                  View all <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {artwork.length === 0 ? (
-                  <p className="text-muted-foreground">No artwork available yet.</p>
-                ) : (
-                  artwork.map((art, index) => (
-                    <div key={art.slug}>
-                      <Link href={`/art/${art.slug}`}>
-                        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-                          <CardHeader>
-                            <CardTitle className="text-lg">{art.title}</CardTitle>
-                            <CardDescription>{art.summary}</CardDescription>
-                          </CardHeader>
-                        </Card>
-                      </Link>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Photography */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Latest Photos</h2>
-                <Link
-                  href="/photo"
-                  className="flex items-center text-accent hover:underline"
-                >
-                  View all <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {photos.length === 0 ? (
-                  <p className="text-muted-foreground">No photos available yet.</p>
-                ) : (
-                  photos.map((photo, index) => (
-                    <div key={photo.slug}>
-                      <Link href={`/photo/${photo.slug}`}>
-                        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-                          <CardHeader>
-                            <CardTitle className="text-lg">{photo.title}</CardTitle>
-                            <CardDescription>{photo.summary}</CardDescription>
-                          </CardHeader>
-                        </Card>
-                      </Link>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-semibold">Featured Works</h2>
+            <Link
+              href="/works"
+              className="flex items-center text-accent hover:underline"
+            >
+              View all <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {works.length === 0 ? (
+              <p className="text-muted-foreground col-span-2">No works available yet.</p>
+            ) : (
+              works.map((work) => (
+                <div key={work.slug}>
+                  <Link href={`/works/${work.slug}`}>
+                    <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+                      <CardHeader>
+                        <CardTitle className="text-lg">{work.title}</CardTitle>
+                        <CardDescription>{work.summary}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {work.featured && (
+                            <Badge variant="default">Featured</Badge>
+                          )}
+                          {work.tags?.slice(0, 3).map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          )) || []}
+                          {work.tags && work.tags.length > 3 && (
+                            <Badge variant="outline">
+                              +{work.tags.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

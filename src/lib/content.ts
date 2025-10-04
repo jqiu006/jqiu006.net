@@ -28,6 +28,35 @@ export interface Note extends BaseContent {
   summary?: string;
 }
 
+export interface Work extends BaseContent {
+  summary: string;
+  tags: string[];
+  images: {
+    src: string;
+    alt: string;
+    w: number;
+    h: number;
+  }[];
+  videos?: {
+    src: string;
+    alt: string;
+    type: 'mp4' | 'avi' | 'mkv';
+  }[];
+  tools?: string[];
+  category: 'digital-art' | '3d' | 'interactive' | 'design' | 'photography' | 'web-dev';
+  featured?: boolean;
+  meta?: {
+    exif?: {
+      camera: string;
+      lens: string;
+      iso: number;
+      shutter: string;
+      aperture: string;
+    };
+  };
+}
+
+// Keep legacy interfaces for backward compatibility
 export interface Artwork extends BaseContent {
   summary: string;
   images: {
@@ -152,8 +181,47 @@ export function getPhotoBySlug(slug: string): Photo | null {
   }
 }
 
-export function getAllTags(type: 'projects' | 'notes'): string[] {
-  const content = type === 'projects' ? getAllProjects() : getAllNotes();
+// New Works functions
+export function getAllWorks(): Work[] {
+  const files = getContentFiles('works');
+  const works = files
+    .map(file => parseContent<Work>('works', file))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
+  return works;
+}
+
+export function getWorkBySlug(slug: string): Work | null {
+  try {
+    return parseContent<Work>('works', `${slug}.mdx`);
+  } catch {
+    return null;
+  }
+}
+
+export function getFeaturedWorks(): Work[] {
+  return getAllWorks().filter(work => work.featured === true);
+}
+
+export function getWorksByCategory(category: Work['category']): Work[] {
+  return getAllWorks().filter(work => work.category === category);
+}
+
+export function getAllTags(type: 'projects' | 'notes' | 'works'): string[] {
+  let content: any[];
+  switch (type) {
+    case 'projects':
+      content = getAllProjects();
+      break;
+    case 'notes':
+      content = getAllNotes();
+      break;
+    case 'works':
+      content = getAllWorks();
+      break;
+    default:
+      content = [];
+  }
   const tags = content.flatMap(item => item.tags || []);
   return Array.from(new Set(tags)).sort();
 }

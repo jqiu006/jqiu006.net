@@ -1,12 +1,10 @@
 import { notFound } from "next/navigation";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getProjectBySlug, getAllProjects } from "@/lib/content";
-import { MDXContent } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
 
 interface ProjectPageProps {
@@ -23,7 +21,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ProjectPageProps) {
-  const project = getProjectBySlug(params.slug);
+  const { slug } = await params;
+  const project = getProjectBySlug(slug);
 
   if (!project) {
     return {};
@@ -42,8 +41,9 @@ export async function generateMetadata({ params }: ProjectPageProps) {
   };
 }
 
-export default function ProjectPage({ params }: ProjectPageProps) {
-  const project = getProjectBySlug(params.slug);
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const { slug } = await params;
+  const project = getProjectBySlug(slug);
 
   if (!project) {
     notFound();
@@ -51,11 +51,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         {/* Back Button */}
         <div className="mb-8">
           <Link href="/projects">
@@ -84,10 +80,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 <Calendar className="h-4 w-4" />
                 {formatDate(project.date)}
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {project.readingTime}
-              </div>
+              {project.readingTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {project.readingTime}
+                </div>
+              )}
               <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
                 {project.status}
               </Badge>
@@ -129,9 +127,11 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
         {/* Content */}
         <div className="max-w-4xl">
-          <MDXContent source={project.content} />
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: project.content }} />
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

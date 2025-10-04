@@ -20,7 +20,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const note = await getNoteBySlug(params.slug)
+  const { slug } = await params;
+  const note = await getNoteBySlug(slug)
   
   if (!note) {
     return {
@@ -47,7 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function NotePage({ params }: Props) {
-  const note = await getNoteBySlug(params.slug)
+  const { slug } = await params;
+  const note = await getNoteBySlug(slug)
 
   if (!note) {
     notFound()
