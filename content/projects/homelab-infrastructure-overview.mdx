@@ -1,0 +1,269 @@
+---
+slug: "homelab-infrastructure-overview"
+title: "Complete Homelab Infrastructure & Network Design"
+date: "2025-01-11"
+year: 2025
+summary: "Comprehensive homelab setup featuring Proxmox virtualization, OPNsense firewall, VLAN segmentation, Docker containerization, and automated monitoring solutions."
+tags: ["Proxmox", "OPNsense", "VLAN", "Docker", "Networking", "Virtualization", "Homelab"]
+cover: "/images/projects/homelab-overview.svg"
+tech: ["Proxmox VE", "OPNsense", "Docker", "Raspberry Pi", "VLAN", "WireGuard", "Traefik", "systemd-networkd"]
+status: "ongoing"
+featured: true
+---
+
+# Complete Homelab Infrastructure & Network Design
+
+## Background & Objectives
+
+This project documents the evolution and current state of my comprehensive homelab infrastructure, designed to provide enterprise-grade networking, virtualization, and service hosting capabilities in a home environment. The primary goals were to:
+
+- **Network Segmentation**: Implement proper VLAN isolation for security and traffic management
+- **Virtualization Platform**: Deploy Proxmox for efficient resource utilization and service isolation  
+- **Container Orchestration**: Utilize Docker for lightweight service deployment and management
+- **Remote Access**: Establish secure VPN connectivity with user-based access controls
+- **Monitoring & Automation**: Implement proactive monitoring and automated remediation
+- **High Availability**: Design redundant systems to minimize service interruptions
+
+## Architecture Overview
+
+### Network Topology
+
+The homelab network is built around a three-tier architecture:
+
+**Core Layer**: OPNsense firewall/router handling WAN connectivity, VLAN routing, and security policies
+**Distribution Layer**: Managed switch providing VLAN tagging and inter-VLAN routing
+**Access Layer**: Various endpoints including Proxmox hosts, Raspberry Pi nodes, and client devices
+
+### VLAN Segmentation Strategy
+
+| VLAN ID | Purpose | Subnet | Access Policy |
+|---------|---------|---------|---------------|
+| 1 | Management/Default | 192.168.1.0/24 | Full access |
+| 10 | Infrastructure | 192.168.10.0/24 | Server-to-server only |
+| 20 | Guest Network | 192.168.20.0/24 | Internet only, no local access |
+| 30 | IoT Devices | 192.168.30.0/24 | Limited local access |
+| 40 | Backup Services | 192.168.40.0/24 | Infrastructure access only |
+| 50 | Printer Network | 192.168.50.0/24 | Local network access only |
+
+## Implementation Details
+
+### Proxmox Virtualization Platform
+
+**Host Configuration**:
+- Multiple Proxmox VE nodes for high availability
+- ZFS storage pools for data integrity and snapshots
+- VM templates for rapid deployment
+- Container (LXC) templates for lightweight services
+
+**Key Virtual Machines**:
+- OPNsense firewall (2 vCPU, 4GB RAM)
+- Docker host (4 vCPU, 8GB RAM)
+- Game servers (variable resources)
+- Development environments
+
+### OPNsense Network Configuration
+
+**Interface Setup**:
+```bash
+# WAN Interface (re1) - Previously had stability issues, resolved with monitoring
+# LAN Interface (re0) - Main network interface
+# LACP Configuration (lagg0) - Implemented for redundancy, later simplified
+```
+
+**VLAN Configuration Process**:
+1. Create VLAN interface with appropriate tag (e.g., VLAN 10)
+2. Assign static IP to VLAN interface (192.168.10.1/24)
+3. Configure DHCP server for VLAN subnet
+4. Set up firewall rules for inter-VLAN communication
+5. Configure switch ports with appropriate VLAN tags
+
+**Firewall Rules**:
+- Default deny-all policy with explicit allow rules
+- Guest VLAN: Internet access only, no local network access
+- Infrastructure VLAN: Server-to-server communication
+- Printer VLAN: Local network access restricted to print services
+
+### Docker Container Infrastructure
+
+**Installation & Setup**:
+```bash
+# Automated Docker installation
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Docker Compose for service orchestration
+sudo apt install docker-compose
+```
+
+**Key Services Deployed**:
+- **Traefik**: Reverse proxy and SSL termination
+- **Nginx**: Web server for self-hosted applications
+- **Gotify**: Push notification service
+- **n8n**: Workflow automation platform
+- **Pi-hole**: Network-wide ad blocking and DNS
+- **FreshRSS**: RSS feed aggregator
+
+### Network Device Configuration
+
+**Raspberry Pi VLAN Setup**:
+```bash
+# systemd-networkd configuration for tagged VLAN
+# /etc/systemd/network/10-eth0.network
+[Match]
+Name=eth0
+
+[Network]
+DHCP=no
+VLAN=eth0.10
+
+# /etc/systemd/network/20-eth0.10.netdev
+[NetDev]
+Name=eth0.10
+Kind=vlan
+
+[VLAN]
+Id=10
+
+# /etc/systemd/network/20-eth0.10.network
+[Match]
+Name=eth0.10
+
+[Network]
+DHCP=ipv4
+```
+
+## Advanced Features & Solutions
+
+### WireGuard VPN Implementation
+
+**Multi-User Access Control**:
+- Individual client configurations with unique keys
+- iptables rules for user-based network restrictions
+- Dynamic IP assignment within VPN subnet
+- Split-tunneling configuration for selective routing
+
+**Configuration Reference**:
+```bash
+# iptables rules for user restrictions
+# Reference: https://gist.github.com/qdm12/4e0e4f9d1a34db9cf63ebb0997827d0d
+```
+
+### Automated Monitoring & Recovery
+
+**WAN Interface Monitoring Script**:
+```bash
+#!/bin/sh
+# /usr/local/bin/wan_monitor.sh
+WAN_INTERFACE="re1"
+PING_TARGET="8.8.8.8"
+LOG_FILE="/var/log/wan_monitor.log"
+
+if ! ping -c 3 -W 3 $PING_TARGET > /dev/null 2>&1; then
+    echo "$(date): WAN interface $WAN_INTERFACE is down. Restarting..." >> $LOG_FILE
+    ifconfig $WAN_INTERFACE down
+    sleep 5
+    ifconfig $WAN_INTERFACE up
+    echo "$(date): WAN interface $WAN_INTERFACE restarted." >> $LOG_FILE
+else
+    echo "$(date): WAN interface $WAN_INTERFACE is up." >> $LOG_FILE
+fi
+```
+
+**Automated Execution**:
+```bash
+# Crontab entry for continuous monitoring
+* * * * * /usr/local/bin/wan_monitor.sh
+
+# Log cleanup automation
+0 0 * * * /usr/local/bin/clean_wan_monitor_log.sh
+```
+
+### SSL/TLS and Reverse Proxy
+
+**Traefik Configuration**:
+- Automatic SSL certificate generation via Let's Encrypt
+- Dynamic service discovery for Docker containers
+- Load balancing and health checks
+
+**Cloudflare Integration**:
+- DNS management and DDoS protection
+- SSL/TLS mode set to "Full (strict)" to resolve redirect loops
+- Origin certificate installation for end-to-end encryption
+
+## Troubleshooting & Lessons Learned
+
+### Network Connectivity Issues
+
+**Problem**: WSL unable to access internal network when Windows uses VLAN tagging
+**Solution**: Configure switch port as untagged for Windows, as WSL cannot process VLAN-tagged packets during network translation
+
+**Problem**: Raspberry Pi hostname resolution across VLANs
+**Root Cause**: mDNS broadcast limitations and IPv6 resolution conflicts
+**Solution**: Configured Pi-hole with local DNS entries as temporary workaround
+
+### Service Integration Challenges
+
+**Problem**: n8n session errors when proxied through Traefik
+**Root Cause**: External service caching conflicts with proxy backend
+**Solution**: Added environment variable `N8N_PUSH_BACKEND=sse` for server-sent events
+
+**Problem**: Docker container inter-VLAN communication
+**Solution**: Transitioned from macvlan to standard bridge networking with proper firewall rules
+
+### Hardware Reliability
+
+**Problem**: OPNsense WAN interface instability
+**Solution**: 
+1. Implemented automated monitoring and restart script
+2. Hardware replacement of unstable network interface
+3. Simplified LACP configuration to reduce complexity
+
+## Current Status & Future Enhancements
+
+### Active Services
+- ✅ Proxmox virtualization cluster
+- ✅ OPNsense firewall with VLAN segmentation  
+- ✅ Docker container orchestration
+- ✅ WireGuard VPN with user restrictions
+- ✅ Automated monitoring and alerting
+- ✅ Self-hosted web applications
+
+### Planned Improvements
+- **High Availability**: Implement OPNsense HA configuration
+- **Backup Strategy**: Automated VM and container backup solutions
+- **Monitoring Enhancement**: Prometheus/Grafana stack deployment
+- **Security Hardening**: IDS/IPS implementation and log analysis
+- **Documentation**: Automated network topology discovery and documentation
+
+## Technical Specifications
+
+**Hardware**:
+- Proxmox Hosts: Multiple x86_64 systems with ZFS storage
+- Network: Managed switch with VLAN support, OPNsense appliance
+- Storage: ZFS pools with regular snapshots and replication
+
+**Software Stack**:
+- Hypervisor: Proxmox VE 8.x
+- Firewall: OPNsense 24.x
+- Container Runtime: Docker with Docker Compose
+- Network Management: systemd-networkd, VLAN tagging
+- Monitoring: Custom shell scripts, planned Prometheus integration
+
+## Key Takeaways
+
+This homelab project demonstrates enterprise networking concepts in a home environment, providing hands-on experience with:
+
+- **Network Segmentation**: Proper VLAN design and implementation
+- **Virtualization**: Resource optimization and service isolation
+- **Automation**: Proactive monitoring and self-healing systems
+- **Security**: Defense-in-depth with multiple security layers
+- **Troubleshooting**: Systematic problem-solving and root cause analysis
+
+The infrastructure continues to evolve, serving as both a production environment for personal services and a learning platform for emerging technologies.
+
+## Related Resources
+
+- [VLAN Configuration Guide](https://wiki.archlinux.org/title/VLAN)
+- [WireGuard Multi-User Setup](https://gist.github.com/qdm12/4e0e4f9d1a34db9cf63ebb0997827d0d)
+- [Proxmox Windows VM Best Practices](https://pve.proxmox.com/wiki/Windows_10_guest_best_practices)

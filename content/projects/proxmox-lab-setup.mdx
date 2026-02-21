@@ -1,0 +1,153 @@
+---
+title: "Multi-Node Proxmox Virtualization Lab"
+date: "2024-01-15"
+year: 2024
+summary: "Built a 3-node Proxmox cluster with shared storage, automated backups, and high availability for homelab virtualization"
+tags: ["Proxmox", "Virtualization", "Clustering", "Storage"]
+cover: "/images/projects/proxmox-logo.png"
+repo: "https://github.com/jqiu006/proxmox-lab-configs"
+tech: ["Proxmox VE", "ZFS", "Ceph", "pfSense", "Ansible", "Terraform"]
+status: "completed"
+---
+
+# Background & Objectives
+
+My homelab had grown to include multiple physical servers running various services, but managing them individually was becoming inefficient. I needed a centralized virtualization platform that could provide:
+
+- **High Availability**: Automatic VM migration during hardware failures
+- **Centralized Management**: Single interface for all virtual machines
+- **Efficient Resource Utilization**: Dynamic allocation of CPU, RAM, and storage
+- **Backup & Recovery**: Automated backup strategies with point-in-time recovery
+
+## Architecture Overview
+
+The lab consists of three Dell OptiPlex 7070 micro PCs, each with:
+- Intel i5-9500T (6 cores, 12 threads)
+- 64GB DDR4 RAM
+- 1TB NVMe SSD (OS + local storage)
+- 2TB SATA SSD (Ceph storage)
+- Gigabit Ethernet
+
+### Network Design
+
+```
+Internet → pfSense Firewall → Management VLAN (192.168.10.0/24)
+                           → VM VLAN (192.168.20.0/24)
+                           → Storage VLAN (192.168.30.0/24)
+```
+
+## Implementation Steps
+
+### 1. Proxmox Installation & Initial Configuration
+
+Installed Proxmox VE 8.1 on each node with ZFS root filesystem for snapshots and data integrity.
+
+```bash
+# Configure network bridges for VLANs
+auto vmbr0
+iface vmbr0 inet static
+    address 192.168.10.10/24
+    gateway 192.168.10.1
+    bridge-ports eno1
+    bridge-stp off
+    bridge-fd 0
+
+auto vmbr1
+iface vmbr1 inet manual
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+```
+
+### 2. Cluster Formation
+
+Created the Proxmox cluster and joined all nodes:
+
+```bash
+# On first node
+pvecm create homelab-cluster
+
+# On additional nodes
+pvecm add 192.168.10.10
+```
+
+### 3. Ceph Storage Configuration
+
+Implemented Ceph distributed storage for VM disk images and backups:
+
+```bash
+# Install Ceph on all nodes
+pveceph install
+
+# Create monitors
+pveceph mon create
+
+# Create OSDs on each node
+pveceph osd create /dev/sdb
+```
+
+### 4. High Availability Setup
+
+Configured HA groups and resource constraints:
+
+```bash
+# Create HA group
+ha-manager groupadd production -nodes pve1:2,pve2:1,pve3:1
+
+# Add critical VMs to HA
+ha-manager add vm:100 --group production --max_restart 3
+```
+
+## Key Challenges & Solutions
+
+### Challenge: Split-Brain Prevention
+**Problem**: Risk of cluster split-brain scenarios with only 3 nodes.
+**Solution**: Implemented QDevice on external Raspberry Pi to provide additional quorum vote.
+
+### Challenge: Storage Performance
+**Problem**: Initial Ceph performance was suboptimal for VM workloads.
+**Solution**: 
+- Tuned Ceph parameters for SSD storage
+- Implemented separate pools for different workload types
+- Added NVMe cache tier for hot data
+
+### Challenge: Backup Strategy
+**Problem**: Need for automated, reliable backup system.
+**Solution**: Implemented Proxmox Backup Server with:
+- Daily incremental backups
+- Weekly full backups
+- 30-day retention policy
+- Offsite replication to cloud storage
+
+## Results & Metrics
+
+### Performance Improvements
+- **VM Deployment Time**: Reduced from 45 minutes to 3 minutes
+- **Resource Utilization**: Increased from 40% to 85% average
+- **Backup Window**: Reduced from 6 hours to 45 minutes
+
+### Availability Metrics
+- **Uptime**: 99.8% over 6 months
+- **Planned Maintenance**: Zero-downtime updates via live migration
+- **Recovery Time**: < 5 minutes for automatic failover
+
+## Key Learnings
+
+1. **Network Segmentation**: Proper VLAN design is crucial for performance and security
+2. **Storage Planning**: Understanding workload patterns helps optimize Ceph configuration
+3. **Monitoring**: Comprehensive monitoring prevents issues before they impact services
+4. **Documentation**: Detailed runbooks are essential for troubleshooting and maintenance
+
+## Future Enhancements
+
+- [ ] Implement GPU passthrough for AI/ML workloads
+- [ ] Add Kubernetes cluster on top of Proxmox VMs
+- [ ] Integrate with external monitoring stack (Prometheus/Grafana)
+- [ ] Implement automated disaster recovery procedures
+
+## Related Resources
+
+- [Proxmox VE Documentation](https://pve.proxmox.com/pve-docs/)
+- [Ceph Storage Best Practices](https://docs.ceph.com/en/latest/)
+- [My Ansible Playbooks](https://github.com/jqiu006/homelab-ansible)

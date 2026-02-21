@@ -1,0 +1,381 @@
+---
+slug: "alpine-linux-ssh-setup"
+title: "Setting Up SSH Service on Alpine Linux"
+date: "2025-03-18"
+tags: ["Alpine Linux", "SSH", "Remote Access", "Linux Administration", "Security"]
+---
+
+# Setting Up SSH Service on Alpine Linux
+
+## Overview
+
+Alpine Linux is a minimal, security-oriented Linux distribution that doesn't include SSH service by default. This guide covers two methods for enabling SSH access on Alpine Linux systems.
+
+## Method 1: Enable SSH During Initial Setup
+
+The simplest approach is to enable SSH during the initial Alpine Linux setup process:
+
+1. Run the setup command: `setup-alpine`
+2. When prompted about SSH service, select "yes" to enable it
+3. Complete the rest of the setup process
+
+This method automatically installs and configures SSH service during system initialization.
+
+## Method 2: Manual SSH Installation and Configuration
+
+For existing Alpine Linux installations or when you need more control over the SSH configuration:
+
+### Step 1: Install OpenSSH Server
+
+Alpine Linux uses the `apk` package manager. Install the SSH server:
+
+```bash
+apk add openssh-server
+```
+
+### Step 2: Start SSH Service and Enable Auto-Start
+
+Start the SSH daemon and configure it to start automatically on boot:
+
+```bash
+# Start the SSH service
+rc-service sshd start
+
+# Add SSH to default runlevel (auto-start on boot)
+rc-update add sshd default
+```
+
+### Step 3: Verify SSH Service Status
+
+Check that the SSH service is running properly:
+
+```bash
+# Check service status
+rc-service sshd status
+
+# Alternative: Check for SSH process
+ps | grep sshd
+```
+
+If the service isn't running, check the system logs:
+
+```bash
+tail -f /var/log/messages
+```
+
+## SSH Configuration
+
+### Basic Configuration
+
+Edit the SSH configuration file to customize settings:
+
+```bash
+vi /etc/ssh/sshd_config
+```
+
+### Key Configuration Options
+
+#### Remote Access Configuration
+
+```ini
+# Allow remote login (default is usually acceptable)
+ListenAddress 0.0.0.0
+Port 22
+
+# Root login settings (consider security implications)
+PermitRootLogin yes  # Change to 'no' for better security
+
+# Password authentication
+PasswordAuthentication yes
+```
+
+#### Security Recommendations
+
+For better security, consider these settings:
+
+```ini
+# Disable root login (recommended)
+PermitRootLogin no
+
+# Use key-based authentication only
+PasswordAuthentication no
+PubkeyAuthentication yes
+
+# Limit login attempts
+MaxAuthTries 3
+
+# Specify allowed users
+AllowUsers username1 username2
+```
+
+### Apply Configuration Changes
+
+After modifying the SSH configuration, restart the service:
+
+```bash
+rc-service sshd restart
+```
+
+## Firewall Configuration
+
+### Check for Active Firewall
+
+Alpine Linux may have iptables or other firewall solutions active:
+
+```bash
+# Check iptables rules
+iptables -L
+
+# Check for running firewall services
+rc-status
+```
+
+### Allow SSH Through Firewall
+
+If a firewall is active, allow SSH traffic:
+
+```bash
+# Allow SSH port (22) through iptables
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# Save iptables rules
+iptables-save > /etc/iptables/iptables.rules
+
+# Restart iptables service
+rc-service iptables restart
+```
+
+### Temporary Firewall Disable (for testing)
+
+To temporarily disable the firewall for troubleshooting:
+
+```bash
+rc-service iptables stop
+```
+
+**Note**: Remember to re-enable the firewall after testing and properly configure rules.
+
+## Network Verification
+
+### Check SSH Port Listening
+
+Verify that SSH is listening on the correct port:
+
+```bash
+netstat -tuln | grep :22
+```
+
+Expected output should show `LISTEN` status on port 22.
+
+### Test Local Connection
+
+Test SSH connectivity from the local machine:
+
+```bash
+ssh localhost
+```
+
+If local connection works but remote doesn't, the issue is likely network-related.
+
+### Get System IP Address
+
+Find the Alpine system's IP address for remote connections:
+
+```bash
+ip a
+```
+
+Look for the IP address on your network interface (usually `eth0` or similar).
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Issue: SSH Connection Refused
+
+**Possible Causes**:
+- SSH service not running
+- Firewall blocking port 22
+- Wrong IP address or port
+
+**Solutions**:
+```bash
+# Verify service is running
+rc-service sshd status
+
+# Check if port is listening
+netstat -tuln | grep :22
+
+# Test firewall rules
+iptables -L | grep 22
+```
+
+#### Issue: Permission Denied
+
+**Possible Causes**:
+- Incorrect username/password
+- Root login disabled
+- SSH keys not properly configured
+
+**Solutions**:
+```bash
+# Check SSH configuration
+grep -E "PermitRootLogin|PasswordAuthentication" /etc/ssh/sshd_config
+
+# Verify user exists
+cat /etc/passwd | grep username
+```
+
+#### Issue: Connection Times Out
+
+**Possible Causes**:
+- Network connectivity issues
+- Firewall blocking connection
+- SSH service not accessible from network
+
+**Solutions**:
+```bash
+# Test network connectivity
+ping [alpine-ip]
+
+# Test port connectivity from remote machine
+telnet [alpine-ip] 22
+
+# Or use nc (netcat)
+nc -zv [alpine-ip] 22
+```
+
+### Advanced Troubleshooting
+
+#### Enable SSH Debug Mode
+
+For detailed troubleshooting, run SSH daemon in debug mode:
+
+```bash
+# Stop the service
+rc-service sshd stop
+
+# Run in debug mode
+/usr/sbin/sshd -D -d
+```
+
+#### Check SSH Logs
+
+Monitor SSH connection attempts:
+
+```bash
+# Real-time log monitoring
+tail -f /var/log/messages | grep sshd
+
+# Check authentication logs
+grep "sshd" /var/log/messages
+```
+
+## Security Best Practices
+
+### 1. Change Default Port
+
+```ini
+# In /etc/ssh/sshd_config
+Port 2222  # Use non-standard port
+```
+
+### 2. Use Key-Based Authentication
+
+Generate SSH keys on client machine:
+
+```bash
+ssh-keygen -t rsa -b 4096
+```
+
+Copy public key to Alpine system:
+
+```bash
+ssh-copy-id username@alpine-ip
+```
+
+Disable password authentication:
+
+```ini
+# In /etc/ssh/sshd_config
+PasswordAuthentication no
+PubkeyAuthentication yes
+```
+
+### 3. Limit User Access
+
+```ini
+# Allow specific users only
+AllowUsers admin user1
+
+# Or allow groups
+AllowGroups ssh-users
+```
+
+### 4. Configure Connection Limits
+
+```ini
+# Limit concurrent connections
+MaxStartups 3
+
+# Set idle timeout
+ClientAliveInterval 300
+ClientAliveCountMax 2
+```
+
+## Testing Remote Connections
+
+### From Linux/macOS
+
+```bash
+ssh username@alpine-ip
+```
+
+### From Windows
+
+Use SSH clients like:
+- Built-in Windows SSH client (Windows 10+)
+- PuTTY
+- Windows Subsystem for Linux (WSL)
+
+### Connection with Custom Port
+
+```bash
+ssh username@alpine-ip -p 2222
+```
+
+## Automation and Scripts
+
+### SSH Service Management Script
+
+```bash
+#!/bin/sh
+# ssh-manager.sh
+
+case "$1" in
+    start)
+        rc-service sshd start
+        ;;
+    stop)
+        rc-service sshd stop
+        ;;
+    restart)
+        rc-service sshd restart
+        ;;
+    status)
+        rc-service sshd status
+        netstat -tuln | grep :22
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+```
+
+## Related Resources
+
+- [Alpine Linux Documentation](https://wiki.alpinelinux.org/)
+- [OpenSSH Configuration Guide](https://www.openssh.com/manual.html)
+- [Alpine Linux Package Management](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper)
+- [SSH Security Best Practices](https://www.ssh.com/academy/ssh/sshd_config)

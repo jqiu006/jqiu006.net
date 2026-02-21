@@ -1,0 +1,82 @@
+---
+title: "Security+ Notes: Network Security Fundamentals"
+date: "2024-01-15"
+tags: ["Security+", "Network Security", "Certification"]
+summary: "Core network security concepts and protocols covered in CompTIA Security+ certification including firewalls, VPNs, and network segmentation."
+---
+
+# Network Security Fundamentals
+
+These are my study notes for the CompTIA Security+ certification, focusing on network security fundamentals and best practices.
+
+## Network Security Devices
+
+### Firewalls
+
+Firewalls are the first line of defense in network security, controlling traffic flow based on predetermined security rules.
+
+**Types of Firewalls:**
+- **Packet Filtering**: Examines packets at network layer
+- **Stateful Inspection**: Tracks connection state
+- **Application Layer**: Deep packet inspection at application layer
+- **Next-Generation (NGFW)**: Combines traditional firewall with additional features
+
+```bash
+# Example iptables rule
+iptables -A INPUT -p tcp --dport 22 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j DROP
+```
+
+### Network Segmentation
+
+Dividing networks into smaller, isolated segments to limit attack surface and contain breaches.
+
+**Implementation Methods:**
+- VLANs (Virtual LANs)
+- Subnetting
+- DMZ (Demilitarized Zone)
+- Air-gapped networks
+
+## VPN Technologies
+
+### IPSec
+- **AH (Authentication Header)**: Provides authentication and integrity
+- **ESP (Encapsulating Security Payload)**: Provides confidentiality, authentication, and integrity
+- **Tunnel Mode**: Entire IP packet is encrypted
+- **Transport Mode**: Only payload is encrypted
+
+### SSL/TLS VPN
+- Operates at application layer
+- Browser-based access
+- Easier to deploy and manage
+- Good for remote access scenarios
+
+## Network Attacks and Mitigation
+
+### Common Attack Vectors
+1. **Man-in-the-Middle (MITM)**
+   - Mitigation: Use encryption, certificate pinning
+2. **DDoS (Distributed Denial of Service)**
+   - Mitigation: Rate limiting, traffic filtering, CDN
+3. **ARP Spoofing**
+   - Mitigation: Static ARP entries, DAI (Dynamic ARP Inspection)
+
+### Network Monitoring
+- **SIEM (Security Information and Event Management)**
+- **IDS/IPS (Intrusion Detection/Prevention Systems)**
+- **Network Traffic Analysis**
+- **Log Correlation**
+
+## Key Takeaways
+
+- Defense in depth is crucial - multiple layers of security
+- Network segmentation limits blast radius of attacks
+- Proper monitoring and logging enable quick incident response
+- Regular security assessments help identify vulnerabilities
+
+## Study Resources
+
+- CompTIA Security+ Study Guide
+- Professor Messer's Security+ Course
+- Cybrary Security+ Training
+- Practice exams and labs

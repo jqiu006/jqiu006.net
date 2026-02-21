@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Guide - jqiu006.net</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Color variables - using oklch color space */
+        :root {
+            --radius: 0.625rem;
+            --background: oklch(1 0 0);
+            --foreground: oklch(0.145 0 0);
+            --card: oklch(1 0 0);
+            --card-foreground: oklch(0.145 0 0);
+            --primary: oklch(0.205 0 0);
+            --primary-foreground: oklch(0.985 0 0);
+            --secondary: oklch(0.97 0 0);
+            --secondary-foreground: oklch(0.205 0 0);
+            --muted: oklch(0.97 0 0);
+            --muted-foreground: oklch(0.556 0 0);
+            --accent: oklch(0.7 0.15 160);
+            --accent-foreground: oklch(0.145 0 0);
+            --destructive: oklch(0.577 0.245 27.325);
+            --border: oklch(0.922 0 0);
+            --input: oklch(0.922 0 0);
+            --ring: oklch(0.708 0 0);
+        }
+
+        .dark {
+            --background: oklch(0.145 0 0);
+            --foreground: oklch(0.985 0 0);
+            --card: oklch(0.205 0 0);
+            --card-foreground: oklch(0.985 0 0);
+            --primary: oklch(0.922 0 0);
+            --primary-foreground: oklch(0.205 0 0);
+            --secondary: oklch(0.269 0 0);
+            --secondary-foreground: oklch(0.985 0 0);
+            --muted: oklch(0.269 0 0);
+            --muted-foreground: oklch(0.708 0 0);
+            --accent: oklch(0.8 0.15 160);
+            --accent-foreground: oklch(0.145 0 0);
+            --destructive: oklch(0.704 0.191 22.216);
+            --border: oklch(1 0 0 / 10%);
+            --input: oklch(1 0 0 / 15%);
+            --ring: oklch(0.556 0 0);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s, color 0.3s;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animation definitions */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slide-in-left {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slide-in-right {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scale-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: currentColor; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent); }
+            50% { box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Animation classes */
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out; }
+        .animate-slide-in-left { animation: slide-in-left 0.5s ease-out; }
+        .animate-slide-in-right { animation: slide-in-right 0.5s ease-out; }
+        .animate-scale-in { animation: scale-in 0.3s ease-out; }
+        .animate-typewriter {
+            animation: typewriter 2s steps(40) forwards;
+            width: 0;
+        }
+        .animate-blink { animation: blink 1s infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .animate-rotate { animation: rotate 2s linear infinite; }
+        .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+
+        /* Base styles */
+        .bg-background { background: var(--background); }
+        .bg-card { background: var(--card); }
+        .bg-primary { background: var(--primary); }
+        .bg-secondary { background: var(--secondary); }
+        .bg-muted { background: var(--muted); }
+        .bg-accent { background: var(--accent); }
+        .bg-destructive { background: var(--destructive); }
+
+        .text-foreground { color: var(--foreground); }
+        .text-card-foreground { color: var(--card-foreground); }
+        .text-primary-foreground { color: var(--primary-foreground); }
+        .text-secondary-foreground { color: var(--secondary-foreground); }
+        .text-muted-foreground { color: var(--muted-foreground); }
+        .text-accent-foreground { color: var(--accent-foreground); }
+        .text-accent { color: var(--accent); }
+
+        .border-border { border-color: var(--border); }
+        .border-input { border-color: var(--input); }
+
+        /* Component styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.8;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--accent-foreground);
+        }
+
+        .btn-accent:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--muted);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--foreground);
+        }
+
+        .btn-ghost:hover {
+            background: var(--muted);
+        }
+
+        .card {
+            background: var(--card);
+            color: var(--card-foreground);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: var(--background);
+            color: var(--foreground);
+            border: 1px solid var(--input);
+            border-radius: calc(var(--radius) - 2px);
+            outline: none;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 229, 168, 0.1);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 9999px;
+            transition: all 0.2s;
+        }
+
+        .badge-default {
+            background: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .badge-accent {
+            background: var(--accent);
+            color: var(--accent-foreground);
+        }
+
+        .badge-outline {
+            background: transparent;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+
+        /* Typewriter effect */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--accent);
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        /* Code block styles */
+        code {
+            background: var(--muted);
+            color: var(--foreground);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            font-family: 'Courier New', monospace;
+        }
+
+        pre {
+            background: var(--muted);
+            color: var(--foreground);
+            padding: 1rem;
+            border-radius: var(--radius);
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        /* Navigation styles */
+        .nav-link {
+            color: var(--muted-foreground);
+            padding: 0.5rem 1rem;
+            border-radius: calc(var(--radius) - 2px);
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.875rem;
+        }
+
+        .nav-link:hover {
+            color: var(--foreground);
+            background: var(--muted);
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            background: var(--muted);
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--foreground);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-description {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+            font-size: 0.9375rem;
+        }
+
+        /* Grid layouts */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Example display area */
+        .example-box {
+            background: var(--muted);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            min-height: 100px;
+        }
+
+        /* Blockquote styles */
+        blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            color: var(--muted-foreground);
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        /* Link styles */
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        table th {
+            background: var(--muted);
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background: var(--muted);
+        }
+
+        /* Loading animation */
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--muted);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--muted);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--primary-foreground);
+            padding: 0.5rem 1rem;
+            border-radius: calc(var(--radius) - 2px);
+            white-space: nowrap;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+            pointer-events: none;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 2rem 0;
+        }
+
+        /* Alert boxes */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius);
+            border-left: 4px solid;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .alert-info {
+            background: color-mix(in oklch, var(--accent) 10%, var(--background));
+            border-color: var(--accent);
+            color: var(--foreground);
+        }
+
+        .alert-success {
+            background: color-mix(in oklch, oklch(0.7 0.15 140) 10%, var(--background));
+            border-color: oklch(0.7 0.15 140);
+            color: var(--foreground);
+        }
+
+        .alert-warning {
+            background: color-mix(in oklch, oklch(0.8 0.15 85) 10%, var(--background));
+            border-color: oklch(0.8 0.15 85);
+            color: var(--foreground);
+        }
+
+        .alert-danger {
+            background: color-mix(in oklch, var(--destructive) 10%, var(--background));
+            border-color: var(--destructive);
+            color: var(--foreground);
+        }
+
+        /* Tag group */
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* Hero Title - Large oversized title with scroll effect */
+        .hero-title {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            margin: 0;
+            text-align: left;
+            color: var(--foreground);
+            overflow: visible;
+            position: absolute;
+            top: 6rem;
+            left: 2rem;
+            transform: scale(1) translateX(0);
+            transform-origin: left top;
+            transition: color 0.3s ease-out, position 0.3s ease-out;
+            will-change: transform, color;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .hero-section {
+            margin: 6rem 0 4rem 0;
+            padding: 0 2rem;
+            position: relative;
+            overflow: visible;
+            min-height: 500px;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--muted-foreground);
+            position: absolute;
+            top: calc(6rem + clamp(4rem, 12vw, 8rem) * 0.9 * 3 + 1.5rem);
+            left: 2rem;
+            max-width: 600px;
+            transform: scale(1);
+            transform-origin: left top;
+            z-index: 100;
+            transition: opacity 0.3s ease-out, position 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            margin-top: calc(clamp(4rem, 12vw, 8rem) * 0.9 * 3 + 1.5rem + 3rem);
+            display: inline-block;
+            position: absolute;
+            top: calc(6rem + clamp(4rem, 12vw, 8rem) * 0.9 * 3 + 1.5rem + 3rem);
+            left: 2rem;
+            z-index: 100;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        /* Ensure content sections are above the title */
+        .section {
+            position: relative;
+            z-index: 10;
+            background: var(--background);
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 0 1rem;
+            }
+
+            .hero-title {
+                left: 1rem;
+            }
+
+            .hero-subtitle {
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme toggle button -->
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+    </div>
+
+    <div class="container">
+        <!-- Hero Header -->
+        <div class="hero-section animate-fade-in-up">
+            <h1 class="hero-title" id="heroTitle">
+                Style<br>Reference<br>Guide
+            </h1>
+            <p class="hero-subtitle">
+                jqiu006.net Design System & Component Library
+            </p>
+            <div class="hero-badge">
+                <span class="badge badge-accent">Version 1.0</span>
+            </div>
+        </div>
+
+        <!-- 1. Color System -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🎨</span>
+                Color System
+            </h2>
+            <p class="section-description">Core color definitions using oklch color space</p>
+
+            <div class="grid-3">
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;" class="bg-primary"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Primary</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Main color for important buttons and emphasis</p>
+                </div>
+
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;" class="bg-secondary"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Secondary</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Secondary color for auxiliary elements</p>
+                </div>
+
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;" class="bg-accent"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Accent</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Accent color (#00E5A8) for links and highlights</p>
+                </div>
+
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;" class="bg-muted"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Muted</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Subtle background for cards and inputs</p>
+                </div>
+
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;" class="bg-destructive"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Destructive</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Warning color for errors and dangerous actions</p>
+                </div>
+
+                <div class="card">
+                    <div style="width: 100%; height: 80px; border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem; border: 1px solid var(--border);"></div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem;">Background</h3>
+                    <p style="font-size: 0.875rem;" class="text-muted-foreground">Page background color</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Typography System -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">📝</span>
+                Typography System
+            </h2>
+            <p class="section-description">Headings, body text, lists, and text styling</p>
+
+            <div class="card">
+                <h1 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0;">H1 Heading - Extra Large</h1>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 1rem 0;">H2 Heading - Large</h2>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin: 1rem 0;">H3 Heading - Medium</h3>
+                <h4 style="font-size: 1.25rem; font-weight: 600; margin: 1rem 0;">H4 Heading - Small</h4>
+                <h5 style="font-size: 1.125rem; font-weight: 500; margin: 1rem 0;">H5 Heading - Smaller</h5>
+                <h6 style="font-size: 1rem; font-weight: 500; margin: 1rem 0;">H6 Heading - Smallest</h6>
+
+                <div class="divider"></div>
+
+                <p style="margin: 1rem 0; line-height: 1.7;">
+                    This is a paragraph of <strong>body text</strong>. It supports <em>italic</em>, <code>inline code</code>,
+                    and <a href="#">links</a>. The text has good readability with proper line height.
+                </p>
+
+                <blockquote>
+                    This is a blockquote example. Used for quoting others or highlighting important information.
+                </blockquote>
+
+                <ul style="margin: 1rem 0; padding-left: 2rem;">
+                    <li style="margin: 0.5rem 0;">Unordered list item 1</li>
+                    <li style="margin: 0.5rem 0;">Unordered list item 2</li>
+                    <li style="margin: 0.5rem 0;">Unordered list item 3</li>
+                </ul>
+
+                <ol style="margin: 1rem 0; padding-left: 2rem;">
+                    <li style="margin: 0.5rem 0;">Ordered list item 1</li>
+                    <li style="margin: 0.5rem 0;">Ordered list item 2</li>
+                    <li style="margin: 0.5rem 0;">Ordered list item 3</li>
+                </ol>
+
+                <pre><code>// Code block example
+function greet(name) {
+    console.log(`Hello, ${name}!`);
+}
+
+greet('World');</code></pre>
+            </div>
+        </section>
+
+        <!-- 3. Buttons -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🔘</span>
+                Buttons
+            </h2>
+            <p class="section-description">Various button styles and states</p>
+
+            <div class="example-box">
+                <button class="btn btn-primary">Primary Button</button>
+                <button class="btn btn-secondary">Secondary Button</button>
+                <button class="btn btn-accent">Accent Button</button>
+                <button class="btn btn-outline">Outline Button</button>
+                <button class="btn btn-ghost">Ghost Button</button>
+            </div>
+
+            <div class="example-box">
+                <button class="btn btn-primary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">Small</button>
+                <button class="btn btn-primary">Default</button>
+                <button class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.5rem;">Large</button>
+            </div>
+
+            <div class="example-box">
+                <button class="btn btn-accent animate-pulse-glow">Glow Effect</button>
+                <button class="btn btn-primary animate-bounce-subtle">Bounce Effect</button>
+            </div>
+        </section>
+
+        <!-- 4. Cards -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🃏</span>
+                Cards
+            </h2>
+            <p class="section-description">Content containers and card components</p>
+
+            <div class="grid-3">
+                <div class="card card-hover">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Standard Card</h3>
+                    <p class="text-muted-foreground" style="line-height: 1.6; font-size: 0.875rem;">
+                        This is a standard card with hover effects including subtle elevation and border highlight.
+                    </p>
+                </div>
+
+                <div class="card card-hover">
+                    <div style="width: 100%; height: 120px; background: var(--accent); border-radius: calc(var(--radius) - 2px); margin-bottom: 1rem;"></div>
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Image Card</h3>
+                    <p class="text-muted-foreground" style="line-height: 1.6; font-size: 0.875rem;">
+                        Card with image content.
+                    </p>
+                </div>
+
+                <div class="card card-hover">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 48px; height: 48px; background: var(--accent); border-radius: 50%;"></div>
+                        <div>
+                            <h3 style="font-size: 1rem; font-weight: 600;">User Name</h3>
+                            <p style="font-size: 0.875rem;" class="text-muted-foreground">@username</p>
+                        </div>
+                    </div>
+                    <p class="text-muted-foreground" style="line-height: 1.6; font-size: 0.875rem;">
+                        Profile card with avatar.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Form Elements -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">📋</span>
+                Form Elements
+            </h2>
+            <p class="section-description">Input fields, selectors, and form components</p>
+
+            <div class="card">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">Text Input</label>
+                    <input type="text" class="input" placeholder="Enter text...">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">Email</label>
+                    <input type="email" class="input" placeholder="your@email.com">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">Textarea</label>
+                    <textarea class="input" rows="4" placeholder="Enter multiline text..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">Select</label>
+                    <select class="input">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                        <option>Option 3</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" style="width: 1.125rem; height: 1.125rem; cursor: pointer;">
+                        <span>Checkbox option</span>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="radio" name="radio-group" style="width: 1.125rem; height: 1.125rem; cursor: pointer;">
+                        <span>Radio option 1</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 0.5rem; font-size: 0.875rem;">
+                        <input type="radio" name="radio-group" style="width: 1.125rem; height: 1.125rem; cursor: pointer;">
+                        <span>Radio option 2</span>
+                    </label>
+                </div>
+
+                <button class="btn btn-primary">Submit Form</button>
+            </div>
+        </section>
+
+        <!-- 6. Badges and Tags -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🏷️</span>
+                Badges and Tags
+            </h2>
+            <p class="section-description">Small components for categorization and labeling</p>
+
+            <div class="example-box">
+                <span class="badge badge-default">Default</span>
+                <span class="badge badge-accent">Accent</span>
+                <span class="badge badge-outline">Outline</span>
+                <span class="badge" style="background: oklch(0.7 0.15 140); color: oklch(0.145 0 0);">Success</span>
+                <span class="badge" style="background: oklch(0.8 0.15 85); color: oklch(0.145 0 0);">Warning</span>
+                <span class="badge" style="background: var(--destructive); color: white;">Danger</span>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Tech Stack Tags</h3>
+                <div class="tag-group">
+                    <span class="badge badge-outline">React</span>
+                    <span class="badge badge-outline">Next.js</span>
+                    <span class="badge badge-outline">TypeScript</span>
+                    <span class="badge badge-outline">Tailwind CSS</span>
+                    <span class="badge badge-outline">Docker</span>
+                    <span class="badge badge-outline">Proxmox</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Animations -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">✨</span>
+                Animation Effects
+            </h2>
+            <p class="section-description">Various animation effects used throughout the site (click to replay)</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Fade In</h3>
+                    <div class="example-box">
+                        <div class="card animate-fade-in" style="padding: 1rem;" onclick="restartAnimation(this)">
+                            Click to replay
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Fade In Up</h3>
+                    <div class="example-box">
+                        <div class="card animate-fade-in-up" style="padding: 1rem;" onclick="restartAnimation(this)">
+                            Click to replay
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Slide In Left</h3>
+                    <div class="example-box">
+                        <div class="card animate-slide-in-left" style="padding: 1rem;" onclick="restartAnimation(this)">
+                            Click to replay
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Slide In Right</h3>
+                    <div class="example-box">
+                        <div class="card animate-slide-in-right" style="padding: 1rem;" onclick="restartAnimation(this)">
+                            Click to replay
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Scale In</h3>
+                    <div class="example-box">
+                        <div class="card animate-scale-in" style="padding: 1rem;" onclick="restartAnimation(this)">
+                            Click to replay
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Typewriter Effect</h3>
+                    <div class="example-box">
+                        <div class="typewriter animate-typewriter" onclick="restartAnimation(this)">
+                            IT Support & Security-Minded Tech
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Navigation -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🧭</span>
+                Navigation Elements
+            </h2>
+            <p class="section-description">Navigation bars and menu components</p>
+
+            <div class="card">
+                <nav style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="#" class="nav-link active">Home</a>
+                    <a href="#" class="nav-link">Projects</a>
+                    <a href="#" class="nav-link">Notes</a>
+                    <a href="#" class="nav-link">Works</a>
+                    <a href="#" class="nav-link">About</a>
+                    <a href="#" class="nav-link">Contact</a>
+                </nav>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Breadcrumb Navigation</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                    <a href="#" class="text-muted-foreground" style="text-decoration: none;">Home</a>
+                    <span class="text-muted-foreground">/</span>
+                    <a href="#" class="text-muted-foreground" style="text-decoration: none;">Projects</a>
+                    <span class="text-muted-foreground">/</span>
+                    <span>Current Page</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Loading & Progress -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">⏳</span>
+                Loading & Progress
+            </h2>
+            <p class="section-description">Loading animations and progress bar components</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Spinner Loader</h3>
+                    <div class="example-box">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Pulse Loading</h3>
+                    <div class="example-box">
+                        <div style="width: 40px; height: 40px; background: var(--accent); border-radius: 50%;" class="animate-pulse-glow"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Progress Bars</h3>
+                <div class="progress-bar" style="margin-bottom: 1rem;">
+                    <div class="progress-bar-fill" style="width: 30%;"></div>
+                </div>
+                <div class="progress-bar" style="margin-bottom: 1rem;">
+                    <div class="progress-bar-fill" style="width: 60%;"></div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 90%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Alerts -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">⚠️</span>
+                Alerts and Notifications
+            </h2>
+            <p class="section-description">Components for displaying information, warnings, and errors</p>
+
+            <div class="alert alert-info">
+                <strong>Info:</strong> This is an informational alert for displaying general information.
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Success:</strong> Operation completed successfully!
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> Please be aware that this action may have risks.
+            </div>
+
+            <div class="alert alert-danger">
+                <strong>Error:</strong> An error occurred. Please try again later.
+            </div>
+        </section>
+
+        <!-- 11. Tables -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">📊</span>
+                Tables
+            </h2>
+            <p class="section-description">Data display tables</p>
+
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Tech Stack</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Proxmox VE Cluster</td>
+                            <td>Proxmox, Docker</td>
+                            <td><span class="badge" style="background: oklch(0.7 0.15 140); color: white;">Complete</span></td>
+                            <td>2024-01-15</td>
+                        </tr>
+                        <tr>
+                            <td>Network Security Monitor</td>
+                            <td>Python, Grafana</td>
+                            <td><span class="badge badge-accent">In Progress</span></td>
+                            <td>2024-02-20</td>
+                        </tr>
+                        <tr>
+                            <td>Portfolio Website</td>
+                            <td>Next.js, TypeScript</td>
+                            <td><span class="badge" style="background: oklch(0.7 0.15 140); color: white;">Complete</span></td>
+                            <td>2024-03-10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 12. Other Components -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">🔧</span>
+                Other Components
+            </h2>
+            <p class="section-description">Additional utility components</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Tooltip</h3>
+                    <div class="example-box">
+                        <div class="tooltip">
+                            <button class="btn btn-primary">Hover for tooltip</button>
+                            <span class="tooltip-text">This is a tooltip!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1rem;">Divider</h3>
+                    <p style="margin-bottom: 0.5rem; font-size: 0.875rem;">Content above</p>
+                    <div class="divider"></div>
+                    <p style="margin-top: 0.5rem; font-size: 0.875rem;">Content below</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 13. Responsive Grid -->
+        <section class="section">
+            <h2 class="section-title">
+                <span style="font-size: 1.5rem;">📐</span>
+                Responsive Grid Layout
+            </h2>
+            <p class="section-description">Adaptive grid system</p>
+
+            <h3 style="font-weight: 600; margin: 2rem 0 1rem; font-size: 1.125rem;">2 Column Grid</h3>
+            <div class="grid-2">
+                <div class="card" style="padding: 2rem; text-align: center;">Column 1</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 2</div>
+            </div>
+
+            <h3 style="font-weight: 600; margin: 2rem 0 1rem; font-size: 1.125rem;">3 Column Grid</h3>
+            <div class="grid-3">
+                <div class="card" style="padding: 2rem; text-align: center;">Column 1</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 2</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 3</div>
+            </div>
+
+            <h3 style="font-weight: 600; margin: 2rem 0 1rem; font-size: 1.125rem;">4 Column Grid</h3>
+            <div class="grid-4">
+                <div class="card" style="padding: 2rem; text-align: center;">Column 1</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 2</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 3</div>
+                <div class="card" style="padding: 2rem; text-align: center;">Column 4</div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 3rem 0; border-top: 1px solid var(--border); margin-top: 4rem;">
+            <p class="text-muted-foreground">
+                &copy; 2024 Jinhui (Chris) Qiu. Style Reference Guide v1.0
+            </p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem;" class="text-muted-foreground">
+                Built with Next.js 15+ | Tailwind CSS | oklch Color Space
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            // Update hero title color immediately when theme changes
+            if (typeof updateHeroTitle === 'function') {
+                updateHeroTitle();
+            }
+        }
+
+        // Restore theme on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        });
+
+        // Animation restart function
+        function restartAnimation(element) {
+            element.style.animation = 'none';
+            setTimeout(function() {
+                element.style.animation = '';
+            }, 10);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Hero title scroll effect - transforms into background element
+        const heroTitle = document.getElementById('heroTitle');
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        const heroBadge = document.querySelector('.hero-badge');
+        const heroSection = document.querySelector('.hero-section');
+        let ticking = false;
+        let heroIsFixed = false;
+        let heroWasAbsolute = true; // 新增：记录上一次是否在 absolute 状态
+
+
+        function updateHeroTitle() {
+            const scrollY = Math.max(window.scrollY || window.pageYOffset, 0);
+
+            // 顶部区域：用 absolute，让它跟着页面弹
+            if (scrollY <= 10) {
+                heroWasAbsolute = true;
+
+                heroTitle.style.position = 'absolute';
+                heroSubtitle.style.position = 'absolute';
+                heroBadge.style.position = 'absolute';
+
+                // 清掉 top / left，用回 CSS 里的值
+                heroTitle.style.top = '';
+                heroSubtitle.style.top = '';
+                heroBadge.style.top = '';
+
+                heroTitle.style.left = '';
+                heroSubtitle.style.left = '';
+                heroBadge.style.left = '';
+
+                // 你的重置 transform / opacity / zIndex ...
+                heroTitle.style.transform = 'scale(1) translateX(0)';
+                heroSubtitle.style.transform = 'scale(1)';
+                heroBadge.style.transform = 'none';
+
+                heroSubtitle.style.opacity = '1';
+                heroBadge.style.opacity = '1';
+
+                heroTitle.style.zIndex = '100';
+                heroSubtitle.style.zIndex = '100';
+                heroBadge.style.zIndex = '100';
+
+                heroTitle.style.color = '';
+
+                ticking = false;
+                return;
+            }
+
+            // 一旦从 absolute 切换到 fixed：锁定当前屏幕位置，避免瞬移
+            if (scrollY > 10 && heroWasAbsolute) {
+                const titleRect = heroTitle.getBoundingClientRect();
+                const subtitleRect = heroSubtitle.getBoundingClientRect();
+                const badgeRect = heroBadge.getBoundingClientRect();
+
+                heroTitle.style.position = 'fixed';
+                heroSubtitle.style.position = 'fixed';
+                heroBadge.style.position = 'fixed';
+
+                // 锁定当前位置：top + left 一起锁
+                heroTitle.style.top = `${titleRect.top}px`;
+                heroTitle.style.left = `${titleRect.left}px`;
+
+                heroSubtitle.style.top = `${subtitleRect.top}px`;
+                heroSubtitle.style.left = `${subtitleRect.left}px`;
+
+                heroBadge.style.top = `${badgeRect.top}px`;
+                heroBadge.style.left = `${badgeRect.left}px`;
+
+                heroWasAbsolute = false;
+            }
+
+
+            // ===== 下面保持你原来的动画逻辑不动 =====
+            const progress = Math.min(scrollY / 800, 1);
+
+            const titleScale = 1 + (progress * 0.8);
+            const subtitleScale = 1 + (progress * 0.4);
+            const translateX = -progress * 6;
+
+            heroTitle.style.transform = `scale(${titleScale}) translateX(${translateX}rem)`;
+            heroSubtitle.style.transform = `scale(${subtitleScale})`;
+
+            if (document.documentElement.classList.contains('dark')) {
+                const lightness = 0.985 - (progress * 0.685); // 0.985 -> 0.3
+                heroTitle.style.color = `oklch(${lightness} 0 0)`;
+            } else {
+                const lightness = 0.145 + (progress * 0.655); // 0.145 -> 0.8
+                heroTitle.style.color = `oklch(${lightness} 0 0)`;
+            }
+
+            const fadeOpacity = Math.max(1 - (progress * 2), 0);
+            heroSubtitle.style.opacity = fadeOpacity;
+            heroBadge.style.opacity = fadeOpacity;
+
+            if (scrollY > 100) {
+                heroTitle.style.zIndex = '0';
+                heroSubtitle.style.zIndex = '0';
+                heroBadge.style.zIndex = '0';
+            } else {
+                heroTitle.style.zIndex = '100';
+                heroSubtitle.style.zIndex = '100';
+                heroBadge.style.zIndex = '100';
+            }
+
+            ticking = false;
+        }
+
+
+        function requestTick() {
+            if (!ticking) {
+                window.requestAnimationFrame(updateHeroTitle);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+
+        // 根据当前滚动位置做一次“首帧校正”，但只在不在顶部时才需要
+        window.addEventListener('load', function () {
+            window.scrollTo(0,0);
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+
+            // 顶部：保持 absolute 初始状态，不做任何强制更新（避免自动轻微下滚）
+            if (scrollY <= 10) {
+                // 顶部视为 absolute 状态
+                heroWasAbsolute = true;
+                return;
+            }
+
+            // 如果刷新时本来就不在顶部：
+            // 让 hero 直接进入“滚动后”状态（fixed + 缩放），
+            // 用一次 updateHeroTitle 来对齐状态
+            heroWasAbsolute = true; // 让 updateHeroTitle 里触发 absolute -> fixed 的那段
+            updateHeroTitle();
+        });
+
+    </script>
+</body>
+</html>

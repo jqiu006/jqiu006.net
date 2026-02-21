@@ -1,0 +1,215 @@
+---
+slug: "traefik-wordpress-reverse-proxy"
+title: "Traefik Reverse Proxy for WordPress with SSL Termination"
+date: "2025-02-27"
+tags: ["Traefik", "WordPress", "Reverse Proxy", "SSL", "Docker", "Self-hosting"]
+---
+
+# Traefik Reverse Proxy for WordPress with SSL Termination
+
+## Overview
+
+This guide covers setting up Traefik as a reverse proxy for a WordPress installation running on a separate LXC container, including SSL termination and resolving common redirect loop issues.
+
+## Prerequisites
+
+- Traefik reverse proxy already configured and running
+- WordPress installation on separate host/container
+- Static IP configured for WordPress host
+- Domain name configured in DNS
+
+## WordPress Host Configuration
+
+### 1. WordPress Installation Setup
+
+Ensure WordPress is installed on a new virtual machine or LXC container with:
+- Static IP address configured
+- WordPress admin settings (home and siteurl) initially set to the static IP
+- Web server (Apache/Nginx) running on port 80
+
+### 2. Traefik File Provider Configuration
+
+Add the following configuration to your Traefik file provider:
+
+```yaml
+http:
+  routers:
+    uka47wp:
+      entryPoints:
+        - http
+      rule: "Host(`uka47wp.onebigmacplz.xyz`)"
+      middlewares:
+        - uka47wp-https-redirect
+      service: uka47wp
+    uka47wp-secure:
+      entryPoints:
+        - https
+      rule: "Host(`uka47wp.onebigmacplz.xyz`)"
+      tls:
+        certResolver: cloudflare
+      service: uka47wp
+  middlewares:
+    uka47wp-https-redirect:
+      redirectScheme:
+        scheme: https
+  services:
+    uka47wp:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.10.33:80"
+```
+
+### 3. DNS Configuration
+
+Add local DNS entry in Pi-hole pointing to your Traefik host:
+```
+uka47wp.onebigmacplz.xyz → [Traefik Host IP]
+```
+
+## WordPress URL Configuration
+
+### Method 1: WordPress Admin Panel
+
+Update the WordPress URLs in the admin panel:
+- Navigate to Settings → General
+- Set WordPress Address (URL): `https://uka47wp.onebigmacplz.xyz`
+- Set Site Address (URL): `https://uka47wp.onebigmacplz.xyz`
+
+### Method 2: WP-CLI (Recommended for Remote Access)
+
+If you cannot access the WordPress admin panel, use WP-CLI:
+
+#### Install WP-CLI
+
+```bash
+# Install dependencies
+sudo apt update
+sudo apt install -y php-cli php-mbstring unzip curl
+
+# Download WP-CLI
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+
+# Make executable and verify
+chmod +x wp-cli.phar
+php wp-cli.phar --info
+
+# Install globally
+sudo mv wp-cli.phar /usr/local/bin/wp
+
+# Verify installation
+wp --info
+```
+
+#### Update WordPress URLs
+
+```bash
+# Navigate to WordPress directory
+cd /var/www/html/wordpress
+
+# Update URLs (as www-data user)
+sudo -u www-data wp option update home 'https://uka47wp.onebigmacplz.xyz'
+sudo -u www-data wp option update siteurl 'https://uka47wp.onebigmacplz.xyz'
+
+# If running as root, use --allow-root flag instead
+wp option update home 'https://uka47wp.onebigmacplz.xyz' --allow-root
+wp option update siteurl 'https://uka47wp.onebigmacplz.xyz' --allow-root
+```
+
+## Resolving Redirect Loop Issues
+
+### Problem
+
+After configuring Traefik and updating WordPress URLs, you may encounter "too many redirects" errors due to conflicts between Traefik's HTTPS redirection and WordPress's internal redirect handling.
+
+### Solution: WordPress Configuration
+
+Edit the WordPress configuration file to handle SSL reverse proxy properly:
+
+```php
+// Add to wp-config.php at the very beginning after <?php
+/**
+ * Handle SSL reverse proxy
+ */
+if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+    $_SERVER['HTTPS']='on';
+
+if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+    $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
+```
+
+**Important**: This code must be added at the very beginning of `wp-config.php` (immediately after the opening `<?php` tag) to prevent other issues.
+
+## SSL Certificate Configuration
+
+### Cloudflare Integration
+
+If using Cloudflare as your DNS provider:
+
+1. **DNS Challenge Configuration**: Ensure Traefik is configured with Cloudflare DNS challenge for automatic certificate generation
+2. **SSL/TLS Mode**: Set Cloudflare SSL/TLS mode to "Full (strict)" to prevent redirect loops
+3. **Origin Certificates**: Consider installing Cloudflare origin certificates for end-to-end encryption
+
+### Let's Encrypt Configuration
+
+Example Traefik configuration for Let's Encrypt with Cloudflare:
+
+```yaml
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: your-email@domain.com
+      storage: /certs/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+```
+
+## Verification Steps
+
+1. **Test HTTP to HTTPS Redirect**: Visit `http://uka47wp.onebigmacplz.xyz` and verify automatic redirect to HTTPS
+2. **SSL Certificate**: Check that the SSL certificate is valid and issued by Let's Encrypt
+3. **WordPress Admin Access**: Ensure WordPress admin panel is accessible at `https://uka47wp.onebigmacplz.xyz/wp-admin`
+4. **Frontend Functionality**: Verify all WordPress frontend features work correctly
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: WordPress admin panel shows mixed content warnings
+**Solution**: Ensure all internal WordPress links use HTTPS by checking the database for any remaining HTTP references
+
+**Issue**: Some WordPress plugins not working with reverse proxy
+**Solution**: Check plugin documentation for reverse proxy compatibility and configure accordingly
+
+**Issue**: Performance issues with reverse proxy
+**Solution**: Enable caching in Traefik and consider using WordPress caching plugins
+
+### Debugging Commands
+
+```bash
+# Check Traefik logs
+docker logs traefik
+
+# Test direct connection to WordPress host
+curl -I http://192.168.10.33:80
+
+# Test Traefik routing
+curl -I -H "Host: uka47wp.onebigmacplz.xyz" http://[traefik-ip]
+```
+
+## Security Considerations
+
+1. **Firewall Rules**: Ensure WordPress host only accepts connections from Traefik
+2. **WordPress Security**: Keep WordPress and plugins updated
+3. **SSL Configuration**: Use strong SSL/TLS settings in Traefik
+4. **Access Logs**: Monitor Traefik access logs for suspicious activity
+
+## Related Resources
+
+- [Traefik Documentation](https://doc.traefik.io/traefik/)
+- [WordPress Reverse Proxy Guide](https://wordpress.org/support/article/administration-over-ssl/)
+- [WP-CLI Documentation](https://wp-cli.org/)
+- [Cloudflare SSL/TLS Settings](https://developers.cloudflare.com/ssl/origin-configuration/)

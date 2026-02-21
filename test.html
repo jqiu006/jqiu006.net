@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apple-style Sticky Takeover Enhanced</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050509;
+      --fg: #f5f5f7;
+      --muted: #86868b;
+      --accent: #0071e3;
+      --radius-xl: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #10101a 0, #050509 55%, #000 100%);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px 160px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 120px;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .intro h1 {
+      font-size: clamp(40px, 6vw, 60px);
+      letter-spacing: -0.04em;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .intro p {
+      max-width: 520px;
+      margin: 0 auto;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       核心：大 sticky 产品区域
+       ========================= */
+    .products-sticky-section {
+      position: relative;
+      min-height: 400vh; /* 拉长，给滚动足够空间 */
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    /* 左侧：一个 sticky 容器，内部两个设备重叠 */
+    .visual-sticky {
+      position: sticky;
+      top: 80px;
+      height: calc(100vh - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .visual-stack {
+      position: relative;
+      width: 320px;
+      max-width: 100%;
+      aspect-ratio: 9 / 19.5;
+    }
+
+    .device {
+      position: absolute;
+      inset: 0;
+      border-radius: 34px;
+      padding: 18px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      transform-origin: center center;
+    }
+
+    .device-1 {
+      background: radial-gradient(circle at top, #2f2f46 0, #050509 45%, #000 100%);
+      z-index: 1;
+    }
+
+    .device-2 {
+      background: radial-gradient(circle at top, #20384f 0, #050509 45%, #000 100%);
+      z-index: 2; /* 产品2在上层，用于“覆盖” */
+    }
+
+    .device-border::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, #5a5af7, #20c1ff, #ffffff10);
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .device-screen {
+      width: 100%;
+      border-radius: 26px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 24px;
+      color: #fefefe;
+    }
+
+    .screen-1 {
+      background:
+        radial-gradient(circle at 20% 0, #ffb347 0, transparent 55%),
+        radial-gradient(circle at 80% 100%, #7f5dff 0, transparent 55%),
+        radial-gradient(circle at 0 100%, #3dd8ff 0, transparent 50%),
+        #050509;
+    }
+
+    .screen-2 {
+      background:
+        radial-gradient(circle at 15% 0, #55ffb3 0, transparent 55%),
+        radial-gradient(circle at 80% 100%, #5d9fff 0, transparent 55%),
+        radial-gradient(circle at 0 100%, #ffd23d 0, transparent 50%),
+        #050509;
+    }
+
+    .device-fg {
+      width: 100%;
+      text-align: center;
+    }
+
+    .device-tagline {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+
+    .device-title {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .device-subtitle {
+      font-size: 12px;
+      opacity: 0.82;
+    }
+
+    .notch {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 26px;
+      border-radius: 18px;
+      background: #000;
+      opacity: 0.85;
+    }
+
+    /* 右侧文案区：两个大的“章节” */
+    .copy-column {
+      position: relative;
+      padding-top: 10vh;
+      padding-bottom: 10vh;
+    }
+
+    .chapter {
+      min-height: 180vh; /* 每个产品一大段滚动空间 */
+      padding: 40px 32px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.04),
+        rgba(255, 255, 255, 0.01)
+      );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+      margin-bottom: 80px;
+    }
+
+    .chapter-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .chapter h2 {
+      font-size: 30px;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
+    }
+
+    .chapter p {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 420px;
+      margin-bottom: 24px;
+    }
+
+    .bullet-list {
+      list-style: none;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .bullet-list li {
+      margin-bottom: 6px;
+    }
+
+    .bullet-list li::before {
+      content: "•";
+      margin-right: 6px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .highlight-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--fg);
+      margin-bottom: 16px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(0, 113, 227, 0.3);
+    }
+
+    .outro {
+      margin-top: 120px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* =========================
+       增强版：Scroll-driven 动画
+       - 使用整个 products-sticky-section 作为时间轴
+       ========================= */
+
+    /* 定义滚动时间线 */
+    @scroll-timeline products-timeline {
+      source: auto;       /* 以该元素自身滚动作为时间线 */
+      orientation: block; /* 垂直滚动 */
+    }
+
+    /* 产品 1：前半段出现，后半段淡出 + 缩小一点 */
+    .device-1 {
+      animation-name: device1FadeOut;
+      animation-timeline: products-timeline;
+      animation-duration: 1;      /* 抽象时间 0~1 */
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-range: 0% 55%;    /* 前 55% 的滚动区间起作用 */
+    }
+
+    @keyframes device1FadeOut {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      60% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.92);
+      }
+    }
+
+    /* 产品 2：中后段从下方淡入覆盖上来 */
+    .device-2 {
+      animation-name: device2FadeIn;
+      animation-timeline: products-timeline;
+      animation-duration: 1;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-range: 35% 95%;  /* 稍晚一点开始接管 */
+    }
+
+    @keyframes device2FadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.94);
+      }
+      40% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* 小屏适配 */
+    @media (max-width: 900px) {
+      main {
+        padding-top: 48px;
+      }
+
+      .intro {
+        margin-bottom: 64px;
+      }
+
+      .products-sticky-section {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .visual-sticky {
+        position: relative;
+        top: 0;
+        height: auto;
+        margin-bottom: 40px;
+      }
+
+      .copy-column {
+        padding-top: 0;
+      }
+
+      .chapter {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="intro">
+      <div class="eyebrow">Scroll Takeover</div>
+      <h1>产品 2 覆盖上来，产品 1 不会被往上“拖走”。</h1>
+      <p>
+        左侧是一个 sticky 视觉区域，内部两台设备重叠。
+        随着滚动，产品 1 渐隐、产品 2 渐显覆盖上来。
+        右侧是两大章节的文案区域。
+      </p>
+    </section>
+
+    <!-- 核心 sticky 区域：两个产品共用一个视觉 -->
+    <section class="products-sticky-section">
+      <!-- 左：sticky 视觉 -->
+      <div class="visual-sticky">
+        <div class="visual-stack">
+          <!-- 产品 1 -->
+          <div class="device device-1 device-border">
+            <div class="notch"></div>
+            <div class="device-screen screen-1">
+              <div class="device-fg">
+                <div class="device-tagline">Product One</div>
+                <div class="device-title">Focus Phone Pro</div>
+                <div class="device-subtitle">
+                  作为你的主力机，稳定、续航、表现都刚刚好。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 产品 2（在上层，用动画盖住产品1） -->
+          <div class="device device-2 device-border">
+            <div class="notch"></div>
+            <div class="device-screen screen-2">
+              <div class="device-fg">
+                <div class="device-tagline">Product Two</div>
+                <div class="device-title">Vision Phone Air</div>
+                <div class="device-subtitle">
+                  更轻、更薄，专门为创作与娱乐准备的伙伴。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：两段文案，滚动驱动切换 -->
+      <div class="copy-column">
+        <!-- 产品 1 文案段落 -->
+        <article class="chapter">
+          <div class="chapter-label">Product · One</div>
+          <h2>当你刚开始滚动时，主力机先讲完自己的故事。</h2>
+          <div class="highlight-pill">
+            <span class="dot"></span>
+            <span>主力日常 · Focus Phone Pro</span>
+          </div>
+          <p>
+            上半段滚动里，你看到的是产品 1：一台偏主力、稳定、续航扎实的手机。
+            屏幕、性能、电池都以“每天都在用”为目标做了权衡。
+          </p>
+          <ul class="bullet-list">
+            <li>日常社交、导航、支付、通话都足够稳定</li>
+            <li>电量可以从早用到晚，不焦虑</li>
+            <li>更多精力给可靠性，而不是极限跑分</li>
+          </ul>
+        </article>
+
+        <!-- 产品 2 文案段落 -->
+        <article class="chapter">
+          <div class="chapter-label">Product · Two</div>
+          <h2>继续往下滚，创作机从下方“覆盖”上来。</h2>
+          <div class="highlight-pill">
+            <span class="dot"></span>
+            <span>创作娱乐 · Vision Phone Air</span>
+          </div>
+          <p>
+            在滚动的中后段，产品 2 开始接管左侧的展示区域：
+            它更加轻盈，适合拍照、剪视频、看剧、听歌，成为你表达和娱乐的主力。
+          </p>
+          <ul class="bullet-list">
+            <li>更轻，长时间握持刷剧也不累</li>
+            <li>相机和多媒体体验更偏内容创作</li>
+            <li>和耳机、平板、电脑之间的联动更顺滑</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="outro">
+      你可以继续扩展第三个产品：
+      重用左侧 sticky 视觉，把“设备 3”堆在最上层，绑定同一条滚动时间线即可。
+    </section>
+  </main>
+</body>
+</html>

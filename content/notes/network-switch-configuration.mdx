@@ -1,0 +1,330 @@
+---
+slug: "network-switch-configuration"
+title: "Advanced Network Switch Configuration & OPNsense Integration"
+date: "2025-04-01"
+tags: ["Networking", "OPNsense", "MikroTik", "VLAN", "Routing", "Network Configuration"]
+---
+
+# Advanced Network Switch Configuration & OPNsense Integration
+
+## Overview
+
+This guide covers advanced network switch configuration scenarios, including replacing layer-2 switches, integrating MikroTik switches with OPNsense, and managing complex routing scenarios with static routes and VLAN configurations.
+
+## OPNsense Static Route Management
+
+### Understanding Route Conflicts
+
+When configuring OPNsense, static routes can conflict with interface-based routing. This is a common issue when transitioning between different network configurations.
+
+### Resolving Interface Conflicts
+
+**Problem**: Static routes conflict with OPNsense interface configurations
+**Solution**: Remove conflicting static routes and reconfigure interfaces
+
+```bash
+# In OPNsense Web Interface:
+# 1. Navigate to System → Routes → Configuration
+# 2. Delete conflicting static routes (disabling is insufficient)
+# 3. Navigate to Interfaces → [Interface Name]
+# 4. Re-save the interface configuration to refresh routing table
+```
+
+**Important**: Simply disabling static routes is not sufficient - they must be completely deleted to resolve conflicts.
+
+## Layer-2 Switch Replacement Process
+
+### VLAN Bridge Configuration
+
+When replacing a traditional layer-2 switch with a more advanced managed switch, proper VLAN configuration is essential.
+
+#### Step 1: Configure VLAN Interfaces
+
+In OPNsense, add all required VLANs to the bridge interface:
+
+```
+Interfaces → Other Types → VLAN
+- Parent Interface: Bridge (or physical interface)
+- VLAN Tag: [10, 20, 30, etc.]
+- Description: [Descriptive name]
+```
+
+#### Step 2: Configure Bridge VLANs
+
+Navigate to `Interfaces → Other Types → Bridge → VLANs` and configure:
+
+**Tagged Ports**: 
+- Bridge interface (for inter-VLAN routing)
+- Upstream connection to router/firewall
+
+**Untagged Ports**: 
+- Access ports for devices that don't support VLAN tagging
+- End-user device connections
+
+**Critical Rule**: All VLANs must be tagged on both the bridge interface and upstream connection for proper routing.
+
+## MikroTik Switch Integration
+
+### Scenario: MikroTik Handling Internal Traffic
+
+This configuration allows a MikroTik switch to handle internal network traffic while OPNsense manages internet access and inter-VLAN routing.
+
+#### Step 1: Configure MikroTik Gateway
+
+Add VLAN gateway addresses on the MikroTik switch:
+
+```
+# In MikroTik RouterOS
+/ip address add address=192.168.20.2/24 interface=vlan20
+/ip address add address=192.168.30.2/24 interface=vlan30
+```
+
+#### Step 2: Disable OPNsense VLAN Interfaces
+
+For VLANs handled by MikroTik:
+
+```
+# In OPNsense Web Interface
+Interfaces → [VLAN Interface] → Disable
+```
+
+This prevents OPNsense from competing for gateway responsibilities.
+
+#### Step 3: Configure Static Routes
+
+Direct VLAN traffic to MikroTik for internal routing:
+
+```
+# In OPNsense: System → Routes → Configuration
+Destination: 192.168.20.0/24
+Gateway: 192.168.1.2 (MikroTik's management IP)
+
+Destination: 192.168.30.0/24  
+Gateway: 192.168.1.2
+```
+
+**Result**: Internal VLAN communication is handled by MikroTik, reducing load on OPNsense.
+
+### Step 4: Configure Firewall Rules (Optional)
+
+Create aliases for easier management:
+
+```
+# In OPNsense: Firewall → Aliases
+Name: VLAN20_NET
+Type: Network
+Content: 192.168.20.0/24
+
+Name: VLAN30_NET  
+Type: Network
+Content: 192.168.30.0/24
+```
+
+Allow traffic from MikroTik-managed VLANs:
+
+```
+# In OPNsense: Firewall → Rules → LAN
+Action: Pass
+Source: VLAN20_NET
+Destination: Any
+Description: Allow VLAN20 internet access
+```
+
+### Step 5: Configure NAT for Internet Access
+
+Enable NAT for MikroTik-managed VLANs:
+
+```
+# In OPNsense: Firewall → NAT → Outbound
+Mode: Manual/Hybrid
+Interface: WAN
+Source: VLAN20_NET (192.168.20.0/24)
+Translation: WAN Address
+Description: NAT for VLAN20
+```
+
+Repeat for each VLAN managed by MikroTik.
+
+## Advanced Configuration Scenarios
+
+### Hybrid Routing Architecture
+
+This setup combines the strengths of both OPNsense and MikroTik:
+
+**OPNsense Responsibilities**:
+- Internet gateway and firewall
+- Inter-VLAN security policies
+- VPN termination
+- Advanced firewall features
+
+**MikroTik Responsibilities**:
+- High-performance internal switching
+- VLAN management
+- Internal routing optimization
+- QoS and traffic shaping
+
+### Network Topology Example
+
+```
+Internet
+    │
+┌───▼────┐
+│OPNsense│ (192.168.1.1 - Main Gateway)
+│Firewall│
+└───┬────┘
+    │
+┌───▼────┐
+│MikroTik│ (192.168.1.2 - Internal Router)
+│ Switch │
+└───┬────┘
+    │
+┌───▼────┬────┬────┐
+│VLAN 20 │VLAN│... │
+│.20.2   │30  │    │
+│Gateway │.30.2│    │
+└────────┴────┴────┘
+```
+
+## Troubleshooting Common Issues
+
+### Issue: Routing Loops
+
+**Symptoms**: Network performance degradation, packet loss
+**Cause**: Conflicting routes between OPNsense and MikroTik
+**Solution**: 
+1. Ensure only one device acts as gateway per VLAN
+2. Use specific routes rather than default routes
+3. Verify routing table consistency
+
+```bash
+# Check OPNsense routing table
+netstat -rn
+
+# Check MikroTik routing table  
+/ip route print
+```
+
+### Issue: VLAN Communication Failures
+
+**Symptoms**: Devices in same VLAN cannot communicate
+**Cause**: Incorrect VLAN tagging or bridge configuration
+**Solution**:
+1. Verify VLAN tags match across all devices
+2. Ensure proper trunk/access port configuration
+3. Check bridge VLAN settings
+
+### Issue: Internet Access Problems
+
+**Symptoms**: Internal communication works, but no internet access
+**Cause**: Missing or incorrect NAT rules
+**Solution**:
+1. Verify static routes point to correct gateway
+2. Check NAT outbound rules include all VLANs
+3. Ensure firewall rules allow outbound traffic
+
+## Performance Optimization
+
+### Traffic Flow Optimization
+
+**Principle**: Keep local traffic local, route only necessary traffic through OPNsense
+
+**Implementation**:
+1. Configure MikroTik for intra-VLAN switching
+2. Use OPNsense only for inter-VLAN and internet traffic
+3. Implement QoS policies on MikroTik for internal traffic
+
+### Monitoring and Diagnostics
+
+**OPNsense Monitoring**:
+```
+# Monitor interface statistics
+System → Diagnostics → Interface Statistics
+
+# Check routing table
+System → Diagnostics → Routes
+
+# Monitor firewall logs
+Firewall → Log Files → Live View
+```
+
+**MikroTik Monitoring**:
+```
+# Monitor interface traffic
+/interface monitor-traffic [interface-name]
+
+# Check routing table
+/ip route print
+
+# Monitor system resources
+/system resource print
+```
+
+## Security Considerations
+
+### Network Segmentation
+
+Maintain security while optimizing performance:
+
+1. **Firewall Policies**: Implement strict inter-VLAN rules in OPNsense
+2. **Access Control**: Use MikroTik for internal access control
+3. **Monitoring**: Log and monitor traffic patterns
+4. **Isolation**: Keep critical services on OPNsense-managed VLANs
+
+### Best Practices
+
+1. **Documentation**: Maintain detailed network diagrams
+2. **Change Management**: Test configuration changes in isolated environment
+3. **Backup**: Regular configuration backups for both devices
+4. **Monitoring**: Implement network monitoring and alerting
+
+## Configuration Templates
+
+### OPNsense Static Route Template
+
+```
+# For each VLAN managed by MikroTik
+Destination Network: 192.168.[VLAN_ID].0/24
+Gateway: 192.168.1.2
+Interface: LAN
+Description: Route to VLAN[VLAN_ID] via MikroTik
+```
+
+### MikroTik VLAN Template
+
+```
+# Create VLAN interface
+/interface vlan add name=vlan[ID] vlan-id=[ID] interface=bridge
+
+# Add IP address
+/ip address add address=192.168.[ID].2/24 interface=vlan[ID]
+
+# Configure DHCP (if needed)
+/ip pool add name=vlan[ID]_pool ranges=192.168.[ID].100-192.168.[ID].200
+/ip dhcp-server add name=vlan[ID]_dhcp interface=vlan[ID] address-pool=vlan[ID]_pool
+```
+
+## Migration Strategy
+
+### Phased Migration Approach
+
+1. **Phase 1**: Document current configuration
+2. **Phase 2**: Configure new switch in parallel
+3. **Phase 3**: Migrate one VLAN at a time
+4. **Phase 4**: Verify functionality and performance
+5. **Phase 5**: Decommission old configuration
+
+### Rollback Plan
+
+Always maintain ability to quickly revert:
+
+1. Keep old configuration backed up
+2. Document all changes made
+3. Test rollback procedures
+4. Have emergency contact procedures
+
+## Related Resources
+
+- [OPNsense Documentation](https://docs.opnsense.org/)
+- [MikroTik RouterOS Manual](https://help.mikrotik.com/docs/)
+- [VLAN Best Practices](https://www.cisco.com/c/en/us/support/docs/lan-switching/vlan/10023-4.html)
+- [Network Troubleshooting Guide](https://www.networkcomputing.com/networking/network-troubleshooting-methodology)

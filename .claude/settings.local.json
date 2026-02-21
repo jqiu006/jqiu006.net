@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:192.168.10.41)",
+      "Bash(git init && git add -A && git commit -m \"Initial commit: MDX-based portfolio site\" && git checkout -b feature/cms-integration)"
+    ]
+  }
+}
