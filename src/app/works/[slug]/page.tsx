@@ -1,4 +1,4 @@
-import { getAllCMSWorks, getCMSWorkById, getCoverUrl, getEntryDate } from '@/lib/cms'
+import { getAllCMSWorks, getCMSWorkById, getCoverUrl, getDisplayDate } from '@/lib/cms'
 import { MDXContent } from '@/lib/mdx'
 import { formatDate } from '@/lib/utils'
 import { Metadata } from 'next'
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: work.Title,
       description: `Creative work: ${work.Title}`,
       type: 'article',
-      publishedTime: getEntryDate(work),
+      ...(getDisplayDate(work) && { publishedTime: getDisplayDate(work)! }),
       images: coverUrl ? [{ url: coverUrl }] : undefined,
     },
     twitter: {
@@ -70,14 +70,16 @@ export default async function WorkPage({ params }: Props) {
         <header className="mb-12">
           <h1 className="text-4xl font-bold mb-4">{work.Title}</h1>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <time dateTime={getEntryDate(work)}>
-                {formatDate(getEntryDate(work))}
-              </time>
+          {getDisplayDate(work) && (
+            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <time dateTime={getDisplayDate(work)!}>
+                  {formatDate(getDisplayDate(work)!)}
+                </time>
+              </div>
             </div>
-          </div>
+          )}
         </header>
 
         {/* Detail content — Strapi embeds images/videos as markdown links with absolute URLs */}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Code, Palette, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { site } from "../../site.config";
-import { getAllCMSProjects, getAllCMSWorks, getEntryDate } from "@/lib/cms";
+import { getAllCMSProjects, getAllCMSWorks, getDisplayDate } from "@/lib/cms";
 import { formatDate } from "@/lib/utils";
 import { HeroSection } from "@/components/hero-section";
 
@@ -92,9 +92,11 @@ export default async function HomePage() {
                           <CardTitle className="text-lg font-semibold group-hover:text-accent transition-colors">
                             {project.Title}
                           </CardTitle>
-                          <CardDescription className="text-sm">
-                            {formatDate(getEntryDate(project))}
-                          </CardDescription>
+                          {getDisplayDate(project) && (
+                            <CardDescription className="text-sm">
+                              {formatDate(getDisplayDate(project)!)}
+                            </CardDescription>
+                          )}
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -134,9 +136,11 @@ export default async function HomePage() {
                           <CardTitle className="text-lg font-semibold group-hover:text-accent transition-colors">
                             {work.Title}
                           </CardTitle>
-                          <CardDescription className="text-sm">
-                            {formatDate(getEntryDate(work))}
-                          </CardDescription>
+                          {getDisplayDate(work) && (
+                            <CardDescription className="text-sm">
+                              {formatDate(getDisplayDate(work)!)}
+                            </CardDescription>
+                          )}
                         </CardHeader>
                       </Card>
                     </Link>

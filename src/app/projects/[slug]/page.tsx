@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { getAllCMSProjects, getCMSProjectById, getEntryDate } from "@/lib/cms";
+import { getAllCMSProjects, getCMSProjectById, getDisplayDate } from "@/lib/cms";
 import { MDXContent } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
 
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: ProjectPageProps) {
     openGraph: {
       title: project.Title,
       type: "article",
-      publishedTime: getEntryDate(project),
+      ...(getDisplayDate(project) && { publishedTime: getDisplayDate(project)! }),
     },
   };
 }
@@ -59,12 +59,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="mb-12">
           <div className="space-y-4">
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {formatDate(getEntryDate(project))}
+            {getDisplayDate(project) && (
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {formatDate(getDisplayDate(project)!)}
+                </div>
               </div>
-            </div>
+            )}
 
             <h1 className="text-4xl font-bold tracking-tight">{project.Title}</h1>
           </div>

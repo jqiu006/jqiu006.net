@@ -1,4 +1,4 @@
-import { getAllCMSTechNotes, getEntryDate } from '@/lib/cms'
+import { getAllCMSTechNotes, getDisplayDate } from '@/lib/cms'
 import { formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -43,11 +43,13 @@ export default async function NotesPage() {
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors">
                         {note.Title}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        <time dateTime={getEntryDate(note)}>
-                          {formatDate(getEntryDate(note))}
-                        </time>
-                      </div>
+                      {getDisplayDate(note) && (
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                          <time dateTime={getDisplayDate(note)!}>
+                            {formatDate(getDisplayDate(note)!)}
+                          </time>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>

@@ -1,4 +1,4 @@
-import { getAllCMSWorks, getCoverUrl, getEntryDate } from '@/lib/cms'
+import { getAllCMSWorks, getCoverUrl, getDisplayDate } from '@/lib/cms'
 import { formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -55,11 +55,13 @@ export default async function WorksPage() {
                       <h3 className="text-lg font-semibold mb-2 group-hover:text-accent transition-colors">
                         {work.Title}
                       </h3>
-                      <div className="text-xs text-muted-foreground">
-                        <time dateTime={getEntryDate(work)}>
-                          {formatDate(getEntryDate(work))}
-                        </time>
-                      </div>
+                      {getDisplayDate(work) && (
+                        <div className="text-xs text-muted-foreground">
+                          <time dateTime={getDisplayDate(work)!}>
+                            {formatDate(getDisplayDate(work)!)}
+                          </time>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:192.168.10.41)",
-      "Bash(git init && git add -A && git commit -m \"Initial commit: MDX-based portfolio site\" && git checkout -b feature/cms-integration)"
+      "Bash(git init && git add -A && git commit -m \"Initial commit: MDX-based portfolio site\" && git checkout -b feature/cms-integration)",
+      "Bash(TOKEN=\"8ff88f1e5871142717db480896bdce2f8bdcc2dc9f59346b8e71ba2945c480bd89893c3b09aa1f2f88c637c2e8ebd26d05619b3ed8854a32292896a20f5dff175eece72b72793568550163f9252641b021681e1cedeaa16134bc46d7f824c01eea4d1467a88fcde64bb1885ad17e508fd8c7233b61e311f455b53c7a169d2440\"\ncurl -s -H \"Authorization: Bearer $TOKEN\" \"http://192.168.10.41:1337/api/projects?populate=*&pagination[pageSize]=1\" | python3 -m json.tool | head -150)"
     ]
   }
 }

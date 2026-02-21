@@ -1,4 +1,4 @@
-import { getAllCMSTechNotes, getCMSTechNoteById, getEntryDate } from '@/lib/cms'
+import { getAllCMSTechNotes, getCMSTechNoteById, getDisplayDate } from '@/lib/cms'
 import { MDXContent } from '@/lib/mdx'
 import { formatDate } from '@/lib/utils'
 import { Metadata } from 'next'
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: note.Title,
       description: `Technical note: ${note.Title}`,
       type: 'article',
-      publishedTime: getEntryDate(note),
+      ...(getDisplayDate(note) && { publishedTime: getDisplayDate(note)! }),
     },
     twitter: {
       card: 'summary',
@@ -66,14 +66,16 @@ export default async function NotePage({ params }: Props) {
         <header className="mb-12">
           <h1 className="text-4xl font-bold mb-4">{note.Title}</h1>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <time dateTime={getEntryDate(note)}>
-                {formatDate(getEntryDate(note))}
-              </time>
+          {getDisplayDate(note) && (
+            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <time dateTime={getDisplayDate(note)!}>
+                  {formatDate(getDisplayDate(note)!)}
+                </time>
+              </div>
             </div>
-          </div>
+          )}
         </header>
 
         <article className="prose prose-neutral dark:prose-invert max-w-none">

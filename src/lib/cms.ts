@@ -74,9 +74,14 @@ export function getCoverUrl(cover: CMSMedia): string {
   return getStrapiMediaUrl(preferred)
 }
 
-/** Pick the display date: prefer PublishDate, fall back to createdAt. */
-export function getEntryDate(entry: { PublishDate: string | null; createdAt: string }): string {
-  return entry.PublishDate ?? entry.createdAt.split('T')[0]
+/** Return PublishDate for display, or null if not set. */
+export function getDisplayDate(entry: { PublishDate: string | null }): string | null {
+  return entry.PublishDate || null
+}
+
+/** Return a date for sorting purposes (falls back to createdAt). */
+function getSortDate(entry: { PublishDate: string | null; createdAt: string }): string {
+  return entry.PublishDate || entry.createdAt
 }
 
 // ─── Internal fetch ───────────────────────────────────────────────────────────
@@ -99,7 +104,7 @@ export async function getAllCMSProjects(): Promise<CMSProject[]> {
     'projects?populate=*&pagination[pageSize]=100'
   )
   return data.data.sort(
-    (a, b) => new Date(getEntryDate(b)).getTime() - new Date(getEntryDate(a)).getTime()
+    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
   )
 }
 
@@ -117,7 +122,7 @@ export async function getAllCMSTechNotes(): Promise<CMSTechNote[]> {
     'technotes?populate=*&pagination[pageSize]=100'
   )
   return data.data.sort(
-    (a, b) => new Date(getEntryDate(b)).getTime() - new Date(getEntryDate(a)).getTime()
+    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
   )
 }
 
@@ -135,7 +140,7 @@ export async function getAllCMSWorks(): Promise<CMSWork[]> {
     'works?populate=*&pagination[pageSize]=100'
   )
   return data.data.sort(
-    (a, b) => new Date(getEntryDate(b)).getTime() - new Date(getEntryDate(a)).getTime()
+    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
   )
 }
 

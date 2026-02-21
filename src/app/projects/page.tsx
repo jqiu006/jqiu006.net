@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getAllCMSProjects, getEntryDate } from "@/lib/cms";
+import { getAllCMSProjects, getDisplayDate } from "@/lib/cms";
 import { formatDate } from "@/lib/utils";
 import { Metadata } from "next";
 import { BackgroundTitle } from "@/components/background-title";
@@ -32,9 +32,11 @@ export default async function ProjectsPage() {
               <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                 <CardHeader>
                   <CardTitle className="text-lg">{project.Title}</CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    {formatDate(getEntryDate(project))}
-                  </CardDescription>
+                  {getDisplayDate(project) && (
+                    <CardDescription className="text-sm text-muted-foreground">
+                      {formatDate(getDisplayDate(project)!)}
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground line-clamp-3">
