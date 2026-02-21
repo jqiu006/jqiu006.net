@@ -2,16 +2,52 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import React from 'react';
 
 interface MDXContentProps {
   source: string;
 }
+
+const VIDEO_EXTENSIONS = /\.(mp4|webm|mov|avi|mkv|ogv)(\?.*)?$/i;
+
+interface AnchorProps {
+  href?: string;
+  children?: React.ReactNode;
+  [key: string]: unknown;
+}
+
+function MDXAnchor({ href, children, ...rest }: AnchorProps) {
+  if (href && VIDEO_EXTENSIONS.test(href)) {
+    return (
+      <span className="block my-6 not-prose">
+        <video
+          controls
+          preload="metadata"
+          className="w-full rounded-lg bg-black max-h-[70vh]"
+        >
+          <source src={href} />
+          Your browser does not support video playback.
+        </video>
+      </span>
+    );
+  }
+  return (
+    <a href={href} {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      {children}
+    </a>
+  );
+}
+
+const mdxComponents = {
+  a: MDXAnchor,
+};
 
 export function MDXContent({ source }: MDXContentProps) {
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none">
       <MDXRemote
         source={source}
+        components={mdxComponents}
         options={{
           mdxOptions: {
             remarkPlugins: [remarkGfm],
