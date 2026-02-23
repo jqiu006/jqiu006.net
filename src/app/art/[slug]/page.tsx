@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Calendar } from 'lucide-react'
 
 interface Props {
   params: {

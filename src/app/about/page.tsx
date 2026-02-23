@@ -188,7 +188,7 @@ export default function AboutPage() {
         <section className="text-center">
           <Card>
             <CardHeader>
-              <CardTitle>Let's Connect</CardTitle>
+              <CardTitle>Let&apos;s Connect</CardTitle>
               <CardDescription>
                 Interested in collaborating or discussing technology? I&apos;d love to hear from you.
               </CardDescription>
