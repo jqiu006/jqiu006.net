@@ -60,7 +60,7 @@ export default async function HomePage() {
         <DotField />
       </div>
 
-      <HeroSection name={site.name} tagline={site.tagline} />
+      <HeroSection name={site.name} taglineDark={site.taglineDark} taglineLight={site.taglineLight} />
 
       <div className="container mx-auto px-4 py-12 relative z-10">
 

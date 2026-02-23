@@ -2,7 +2,9 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypePrettyCode from 'rehype-pretty-code';
 import React from 'react';
+import { CodeBlock } from '@/components/code-block';
 
 interface MDXContentProps {
   source: string;
@@ -40,6 +42,16 @@ function MDXAnchor({ href, children, ...rest }: AnchorProps) {
 
 const mdxComponents = {
   a: MDXAnchor,
+  pre: CodeBlock,
+};
+
+const prettyCodeOptions = {
+  theme: {
+    dark: 'github-dark',
+    light: 'github-light',
+  },
+  keepBackground: false,
+  defaultLang: 'plaintext',
 };
 
 export function MDXContent({ source }: MDXContentProps) {
@@ -52,6 +64,7 @@ export function MDXContent({ source }: MDXContentProps) {
           mdxOptions: {
             remarkPlugins: [remarkGfm],
             rehypePlugins: [
+              [rehypePrettyCode, prettyCodeOptions],
               rehypeSlug,
               [
                 rehypeAutolinkHeadings,

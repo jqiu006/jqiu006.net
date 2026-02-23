@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 interface HeroSectionProps {
   name: string;
-  tagline: string;
+  taglineDark: string;
+  taglineLight: string;
 }
 
-export function HeroSection({ name, tagline }: HeroSectionProps) {
+export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProps) {
+  const { resolvedTheme } = useTheme();
+  const tagline = resolvedTheme === "light" ? taglineLight : taglineDark;
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);

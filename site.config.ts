@@ -1,6 +1,8 @@
 export const site = {
   name: "Jinhui (Chris) Qiu",
   tagline: "IT Support & Security‑Minded Technologist",
+  taglineDark: "In the dark we stop pretending the world owes us clarity",
+  taglineLight: "In the light we realize clarity was never the world's promise",
   description: "Personal portfolio showcasing IT/Homelab projects, security research, and creative works including digital art and photography.",
   url: "https://jqiu006.com",
   accent: "#00E5A8", // Bright cyan-green accent color
