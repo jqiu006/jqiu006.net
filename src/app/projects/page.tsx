@@ -8,7 +8,7 @@ import { BackgroundTitle } from "@/components/background-title";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'IT Projects & Homelab',
+  title: 'IT Projects',
   description: 'Exploring network security, virtualization, automation, and infrastructure projects',
 };
 

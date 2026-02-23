@@ -2,9 +2,10 @@ import Link from "next/link";
 import { ArrowRight, Code, Palette, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { site } from "../../site.config";
-import { getAllCMSProjects, getAllCMSWorks, getDisplayDate } from "@/lib/cms";
+import { getAllCMSProjects, getAllCMSWorks, getDisplayDate, getCoverUrl } from "@/lib/cms";
 import { formatDate } from "@/lib/utils";
 import { HeroSection } from "@/components/hero-section";
+import { DotField } from "@/components/dot-field";
 
 export const revalidate = 60;
 
@@ -35,13 +36,33 @@ export default async function HomePage() {
     getAllCMSWorks(),
   ]);
   const recentProjects = projects.slice(0, 3);
-  const recentWorks = works.slice(0, 4);
+  const sortedWorks = [...works].sort((a, b) => {
+    const aDate = a.PublishDate;
+    const bDate = b.PublishDate;
+    if (aDate && bDate) return new Date(bDate).getTime() - new Date(aDate).getTime();
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+    return 0;
+  });
+  const recentWorks = sortedWorks.slice(0, 4);
 
   return (
     <div className="relative">
+      {/* Particle field: spans hero + content, fades out at bottom */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none"
+        style={{
+          height: '130vh',
+          maskImage: 'linear-gradient(to bottom, black 45%, transparent 90%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 45%, transparent 90%)',
+        }}
+      >
+        <DotField />
+      </div>
+
       <HeroSection name={site.name} tagline={site.tagline} />
 
-      <div className="container mx-auto px-4 py-12 relative z-10 bg-background">
+      <div className="container mx-auto px-4 py-12 relative z-10">
 
         {/* Quick Links */}
         <section className="mb-16 animate-fade-in-up">
@@ -131,7 +152,17 @@ export default async function HomePage() {
                 recentWorks.map((work, index) => (
                   <div key={work.documentId} className="animate-slide-in-right" style={{ animationDelay: `${index * 0.1}s` }}>
                     <Link href={`/works/${work.documentId}`}>
-                      <Card className="group h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-accent/50 border border-border">
+                      <Card className="group h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-accent/50 border border-border overflow-hidden">
+                        {work.Cover && work.Cover.mime?.startsWith("image/") && (
+                          <div className="overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={getCoverUrl(work.Cover)}
+                              alt={work.Title}
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        )}
                         <CardHeader>
                           <CardTitle className="text-lg font-semibold group-hover:text-accent transition-colors">
                             {work.Title}

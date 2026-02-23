@@ -1,8 +1,7 @@
-import { getAllCMSTechNotes, getDisplayDate } from '@/lib/cms'
-import { formatDate } from '@/lib/utils'
-import Link from 'next/link'
+import { getAllCMSTechNotes } from '@/lib/cms'
 import { Metadata } from 'next'
 import { BackgroundTitle } from '@/components/background-title'
+import { NotesList } from '@/components/notes-list'
 
 export const revalidate = 60;
 
@@ -13,6 +12,16 @@ export const metadata: Metadata = {
 
 export default async function NotesPage() {
   const notes = await getAllCMSTechNotes();
+
+  // Notes with a PublishDate first (newest → oldest), undated ones at the end
+  const sorted = [...notes].sort((a, b) => {
+    const aDate = a.PublishDate;
+    const bDate = b.PublishDate;
+    if (aDate && bDate) return new Date(bDate).getTime() - new Date(aDate).getTime();
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+    return 0;
+  });
 
   return (
     <div className="relative">
@@ -26,36 +35,7 @@ export default async function NotesPage() {
             </p>
           </div>
 
-          <div className="grid gap-6">
-            {notes.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No notes available yet.</p>
-              </div>
-            ) : (
-              notes.map((note) => (
-                <Link
-                  key={note.documentId}
-                  href={`/notes/${note.documentId}`}
-                  className="group block p-6 border border-border rounded-lg hover:border-accent/50 transition-all duration-200 hover:shadow-md"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors">
-                        {note.Title}
-                      </h3>
-                      {getDisplayDate(note) && (
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <time dateTime={getDisplayDate(note)!}>
-                            {formatDate(getDisplayDate(note)!)}
-                          </time>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
+          <NotesList notes={sorted} />
         </div>
       </div>
     </div>

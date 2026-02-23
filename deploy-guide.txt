@@ -1,0 +1,224 @@
+================================================================================
+  jqiu006.net — Linux Deployment Guide
+  Next.js 15 + Strapi CMS
+================================================================================
+
+PREREQUISITES
+─────────────
+- Linux server (Ubuntu 22.04+ / Debian 12+ recommended)
+- Node.js 18 or later
+- npm (comes with Node.js)
+- Git
+- Root or sudo access
+
+Install Node.js (if not already installed):
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+
+Verify:
+  node -v   # should be 18+
+  npm -v
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 1 — CLONE THE REPOSITORY
+────────────────────────────────────────────────────────────────────────────────
+
+  git clone <your-repo-url> /var/www/jqiu006.net
+  cd /var/www/jqiu006.net
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 2 — ENVIRONMENT VARIABLES
+────────────────────────────────────────────────────────────────────────────────
+
+Create the .env.local file in the project root:
+
+  nano /var/www/jqiu006.net/.env.local
+
+Paste the following (replace values as needed):
+
+  STRAPI_BASE_URL=http://<strapi-server-ip>:1337
+  STRAPI_API_TOKEN=<your-strapi-api-token>
+
+Save and exit (Ctrl+O, Enter, Ctrl+X).
+
+  ⚠  Do NOT commit .env.local to git. It is already in .gitignore.
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 3 — INSTALL DEPENDENCIES & BUILD
+────────────────────────────────────────────────────────────────────────────────
+
+  cd /var/www/jqiu006.net
+  npm install
+  npm run build
+
+  The build uses Turbopack and outputs to the .next/ directory.
+  This step requires the Strapi server to be reachable (for static generation).
+  If Strapi is offline, the build will still succeed but pages will be empty.
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 4 — TEST MANUALLY BEFORE AUTO-START
+────────────────────────────────────────────────────────────────────────────────
+
+  npm run start
+
+  Visit http://<server-ip>:3000 to confirm the site loads.
+  Press Ctrl+C to stop when done.
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 5 — AUTO-START WITH SYSTEMD
+────────────────────────────────────────────────────────────────────────────────
+
+Create a systemd service file:
+
+  sudo nano /etc/systemd/system/jqiu006.service
+
+Paste the following content:
+
+  [Unit]
+  Description=jqiu006.net Next.js App
+  After=network.target
+
+  [Service]
+  Type=simple
+  User=www-data
+  WorkingDirectory=/var/www/jqiu006.net
+  ExecStart=/usr/bin/npm run start
+  Restart=on-failure
+  RestartSec=5
+  Environment=NODE_ENV=production
+  Environment=PORT=3000
+
+  [Install]
+  WantedBy=multi-user.target
+
+Save and exit (Ctrl+O, Enter, Ctrl+X).
+
+Give www-data ownership of the project directory:
+
+  sudo chown -R www-data:www-data /var/www/jqiu006.net
+
+Enable and start the service:
+
+  sudo systemctl daemon-reload
+  sudo systemctl enable jqiu006
+  sudo systemctl start jqiu006
+
+Check status:
+
+  sudo systemctl status jqiu006
+
+View live logs:
+
+  sudo journalctl -u jqiu006 -f
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 6 — NGINX REVERSE PROXY (RECOMMENDED)
+────────────────────────────────────────────────────────────────────────────────
+
+This exposes the site on port 80 (HTTP) instead of 3000.
+
+Install Nginx:
+
+  sudo apt-get install -y nginx
+
+Create a site config:
+
+  sudo nano /etc/nginx/sites-available/jqiu006.net
+
+Paste:
+
+  server {
+      listen 80;
+      server_name jqiu006.net www.jqiu006.net;
+
+      location / {
+          proxy_pass http://127.0.0.1:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_cache_bypass $http_upgrade;
+      }
+  }
+
+Enable the config and restart Nginx:
+
+  sudo ln -s /etc/nginx/sites-available/jqiu006.net /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl enable nginx
+  sudo systemctl restart nginx
+
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 7 — HTTPS WITH CERTBOT (OPTIONAL)
+────────────────────────────────────────────────────────────────────────────────
+
+  sudo apt-get install -y certbot python3-certbot-nginx
+  sudo certbot --nginx -d jqiu006.net -d www.jqiu006.net
+
+Certbot will auto-renew. Verify auto-renewal:
+
+  sudo certbot renew --dry-run
+
+
+────────────────────────────────────────────────────────────────────────────────
+UPDATING THE SITE
+────────────────────────────────────────────────────────────────────────────────
+
+Whenever you push new code:
+
+  cd /var/www/jqiu006.net
+  git pull
+  npm install          # only needed if dependencies changed
+  npm run build
+  sudo systemctl restart jqiu006
+
+Or create a one-liner alias in ~/.bashrc:
+
+  alias deploy-site='cd /var/www/jqiu006.net && git pull && npm run build && sudo systemctl restart jqiu006'
+
+
+────────────────────────────────────────────────────────────────────────────────
+FIREWALL (UFW)
+────────────────────────────────────────────────────────────────────────────────
+
+If UFW is active, allow HTTP/HTTPS:
+
+  sudo ufw allow 80
+  sudo ufw allow 443
+  # Do NOT expose port 3000 publicly if using Nginx
+  sudo ufw status
+
+
+────────────────────────────────────────────────────────────────────────────────
+TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────────────────
+
+Site not loading:
+  sudo systemctl status jqiu006
+  sudo journalctl -u jqiu006 -n 50
+
+Strapi connection errors:
+  - Check that the Strapi server at STRAPI_BASE_URL is running and reachable
+  - The site will still load but content will be empty (graceful fallback)
+
+Rebuild after .env.local change:
+  sudo systemctl stop jqiu006
+  npm run build
+  sudo systemctl start jqiu006
+
+Permission errors:
+  sudo chown -R www-data:www-data /var/www/jqiu006.net
+
+Port 3000 already in use:
+  lsof -i :3000
+  # Change PORT in the systemd service file if needed
+
+================================================================================

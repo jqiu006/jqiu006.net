@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 export default async function WorksPage() {
   const works = await getAllCMSWorks();
 
+  const sorted = [...works].sort((a, b) => {
+    const aDate = a.PublishDate;
+    const bDate = b.PublishDate;
+    if (aDate && bDate) return new Date(bDate).getTime() - new Date(aDate).getTime();
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+    return 0;
+  });
+
   return (
     <div className="relative">
       <BackgroundTitle />
@@ -32,7 +41,7 @@ export default async function WorksPage() {
                 <p className="text-muted-foreground">No works available yet.</p>
               </div>
             ) : (
-              works.map((work) => (
+              sorted.map((work) => (
                 <Link
                   key={work.documentId}
                   href={`/works/${work.documentId}`}

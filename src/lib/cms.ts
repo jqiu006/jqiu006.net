@@ -87,66 +87,97 @@ function getSortDate(entry: { PublishDate: string | null; createdAt: string }): 
 // ─── Internal fetch ───────────────────────────────────────────────────────────
 
 async function fetchCMS<T>(endpoint: string): Promise<T> {
-  const res = await fetch(`${STRAPI_BASE_URL}/api/${endpoint}`, {
-    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    next: { revalidate: 60 },
-  })
-  if (!res.ok) {
-    throw new Error(`CMS fetch failed for "${endpoint}": ${res.status} ${res.statusText}`)
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 5000)
+  try {
+    const res = await fetch(`${STRAPI_BASE_URL}/api/${endpoint}`, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 },
+      signal: controller.signal,
+    })
+    if (!res.ok) {
+      throw new Error(`CMS fetch failed for "${endpoint}": ${res.status} ${res.statusText}`)
+    }
+    return res.json()
+  } finally {
+    clearTimeout(timer)
   }
-  return res.json()
 }
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 export async function getAllCMSProjects(): Promise<CMSProject[]> {
-  const data = await fetchCMS<{ data: CMSProject[] }>(
-    'projects?populate=*&pagination[pageSize]=100'
-  )
-  return data.data.sort(
-    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
-  )
+  try {
+    const data = await fetchCMS<{ data: CMSProject[] }>(
+      'projects?populate=*&pagination[pageSize]=100'
+    )
+    return data.data.sort(
+      (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
+    )
+  } catch {
+    return []
+  }
 }
 
 export async function getCMSProjectById(documentId: string): Promise<CMSProject | null> {
-  const data = await fetchCMS<{ data: CMSProject[] }>(
-    `projects?filters[documentId][$eq]=${documentId}&populate=*`
-  )
-  return data.data[0] ?? null
+  try {
+    const data = await fetchCMS<{ data: CMSProject[] }>(
+      `projects?filters[documentId][$eq]=${documentId}&populate=*`
+    )
+    return data.data[0] ?? null
+  } catch {
+    return null
+  }
 }
 
 // ─── Tech Notes ───────────────────────────────────────────────────────────────
 
 export async function getAllCMSTechNotes(): Promise<CMSTechNote[]> {
-  const data = await fetchCMS<{ data: CMSTechNote[] }>(
-    'technotes?populate=*&pagination[pageSize]=100'
-  )
-  return data.data.sort(
-    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
-  )
+  try {
+    const data = await fetchCMS<{ data: CMSTechNote[] }>(
+      'technotes?populate=*&pagination[pageSize]=100'
+    )
+    return data.data.sort(
+      (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
+    )
+  } catch {
+    return []
+  }
 }
 
 export async function getCMSTechNoteById(documentId: string): Promise<CMSTechNote | null> {
-  const data = await fetchCMS<{ data: CMSTechNote[] }>(
-    `technotes?filters[documentId][$eq]=${documentId}&populate=*`
-  )
-  return data.data[0] ?? null
+  try {
+    const data = await fetchCMS<{ data: CMSTechNote[] }>(
+      `technotes?filters[documentId][$eq]=${documentId}&populate=*`
+    )
+    return data.data[0] ?? null
+  } catch {
+    return null
+  }
 }
 
 // ─── Works ────────────────────────────────────────────────────────────────────
 
 export async function getAllCMSWorks(): Promise<CMSWork[]> {
-  const data = await fetchCMS<{ data: CMSWork[] }>(
-    'works?populate=*&pagination[pageSize]=100'
-  )
-  return data.data.sort(
-    (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
-  )
+  try {
+    const data = await fetchCMS<{ data: CMSWork[] }>(
+      'works?populate=*&pagination[pageSize]=100'
+    )
+    return data.data.sort(
+      (a, b) => new Date(getSortDate(b)).getTime() - new Date(getSortDate(a)).getTime()
+    )
+  } catch {
+    return []
+  }
 }
 
 export async function getCMSWorkById(documentId: string): Promise<CMSWork | null> {
-  const data = await fetchCMS<{ data: CMSWork[] }>(
-    `works?filters[documentId][$eq]=${documentId}&populate=*`
-  )
-  return data.data[0] ?? null
+  try {
+    const data = await fetchCMS<{ data: CMSWork[] }>(
+      `works?filters[documentId][$eq]=${documentId}&populate=*`
+    )
+    return data.data[0] ?? null
+  } catch {
+    return null
+  }
 }
