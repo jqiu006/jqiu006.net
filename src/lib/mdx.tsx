@@ -1,4 +1,4 @@
-import { MDXRemote } from 'next-mdx-remote/rsc';
+import { compileMDX } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -54,31 +54,44 @@ const prettyCodeOptions = {
   defaultLang: 'plaintext',
 };
 
-export function MDXContent({ source }: MDXContentProps) {
+export async function MDXContent({ source }: MDXContentProps) {
+  let content: React.ReactElement;
+
+  try {
+    const compiled = await compileMDX({
+      source,
+      components: mdxComponents,
+      options: {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [
+            [rehypePrettyCode, prettyCodeOptions],
+            rehypeSlug,
+            [
+              rehypeAutolinkHeadings,
+              {
+                behavior: 'wrap',
+                properties: { className: ['anchor'] },
+              },
+            ],
+          ],
+        },
+      },
+    });
+    content = compiled.content;
+  } catch {
+    // MDX compilation failed (e.g. non-ASCII characters in tag context)
+    // Fall back to rendering the raw source as preformatted text
+    content = (
+      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-mono">
+        {source}
+      </pre>
+    );
+  }
+
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none">
-      <MDXRemote
-        source={source}
-        components={mdxComponents}
-        options={{
-          mdxOptions: {
-            remarkPlugins: [remarkGfm],
-            rehypePlugins: [
-              [rehypePrettyCode, prettyCodeOptions],
-              rehypeSlug,
-              [
-                rehypeAutolinkHeadings,
-                {
-                  behavior: 'wrap',
-                  properties: {
-                    className: ['anchor'],
-                  },
-                },
-              ],
-            ],
-          },
-        }}
-      />
+      {content}
     </div>
   );
 }
