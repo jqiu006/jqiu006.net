@@ -44,7 +44,7 @@ export default function ContactPage() {
       
       setSubmitStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch (error) {
+    } catch {
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -61,7 +61,7 @@ export default function ContactPage() {
           <h1 className="mb-4 text-4xl font-bold tracking-tight">Get In Touch</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Have a question, want to collaborate, or just want to say hello? 
-            I'd love to hear from you.
+            I&apos;d love to hear from you.
           </p>
         </section>
 
@@ -72,7 +72,7 @@ export default function ContactPage() {
               <CardHeader>
                 <CardTitle>Send a Message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and I'll get back to you as soon as possible.
+                  Fill out the form below and I&apos;ll get back to you as soon as possible.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -133,7 +133,7 @@ export default function ContactPage() {
                   {submitStatus === "success" && (
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                       <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">Message sent successfully! I'll get back to you soon.</span>
+                      <span className="text-sm">Message sent successfully! I&apos;ll get back to you soon.</span>
                     </div>
                   )}
 

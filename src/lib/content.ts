@@ -208,7 +208,7 @@ export function getWorksByCategory(category: Work['category']): Work[] {
 }
 
 export function getAllTags(type: 'projects' | 'notes' | 'works'): string[] {
-  let content: any[];
+  let content: { tags?: string[] }[];
   switch (type) {
     case 'projects':
       content = getAllProjects();

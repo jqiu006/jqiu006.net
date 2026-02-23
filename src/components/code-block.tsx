@@ -5,14 +5,9 @@ import { Copy, Check } from "lucide-react";
 
 interface CodeBlockProps extends React.HTMLAttributes<HTMLPreElement> {
   children?: React.ReactNode;
-  "data-language"?: string;
 }
 
-export function CodeBlock({
-  children,
-  "data-language": _language,
-  ...props
-}: CodeBlockProps) {
+export function CodeBlock({ children, ...props }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 

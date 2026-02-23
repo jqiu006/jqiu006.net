@@ -99,8 +99,8 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
               <p>
-                I'm a dedicated IT professional with a strong focus on network security and infrastructure management. 
-                My journey in technology began with a curiosity about how systems work together, which evolved into 
+                I&apos;m a dedicated IT professional with a strong focus on network security and infrastructure management.
+                My journey in technology began with a curiosity about how systems work together, which evolved into
                 a passion for building secure, efficient, and scalable solutions.
               </p>
               <p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
                 innovative solutions that improve both security and user experience.
               </p>
               <p>
-                Beyond my technical work, I'm also passionate about digital art and photography, which helps me 
+                Beyond my technical work, I&apos;m also passionate about digital art and photography, which helps me
                 approach problems with creativity and attention to detail. I believe that the intersection of 
                 technology and creativity leads to the most innovative solutions.
               </p>
@@ -169,7 +169,7 @@ export default function AboutPage() {
             <CardHeader>
               <CardTitle>Currently Learning</CardTitle>
               <CardDescription>
-                I'm always expanding my knowledge and staying current with technology trends
+                I&apos;m always expanding my knowledge and staying current with technology trends
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -190,7 +190,7 @@ export default function AboutPage() {
             <CardHeader>
               <CardTitle>Let's Connect</CardTitle>
               <CardDescription>
-                Interested in collaborating or discussing technology? I'd love to hear from you.
+                Interested in collaborating or discussing technology? I&apos;d love to hear from you.
               </CardDescription>
             </CardHeader>
             <CardContent>
