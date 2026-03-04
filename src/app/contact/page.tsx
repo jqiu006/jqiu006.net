@@ -20,6 +20,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -33,6 +34,7 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
+    setErrorMsg("");
 
     try {
       const res = await fetch('/api/contact', {
@@ -41,12 +43,16 @@ export default function ContactPage() {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error (${res.status})`);
+      }
 
       setSubmitStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch {
+    } catch (err) {
       setSubmitStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setIsSubmitting(false);
     }
@@ -139,9 +145,11 @@ export default function ContactPage() {
                   )}
 
                   {submitStatus === "error" && (
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">Something went wrong. Please try again or contact me directly.</span>
+                    <div className="flex items-start gap-2 text-red-600 dark:text-red-400">
+                      <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      <span className="text-sm">
+                        Failed to send: {errorMsg || "please try again or reach me directly via email."}
+                      </span>
                     </div>
                   )}
 

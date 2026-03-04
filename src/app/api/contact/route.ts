@@ -36,7 +36,12 @@ export async function POST(req: NextRequest) {
   });
 
   if (!res.ok) {
-    return NextResponse.json({ error: 'Failed to send to Discord' }, { status: 500 });
+    const body = await res.text();
+    console.error(`Discord webhook error ${res.status}:`, body);
+    return NextResponse.json(
+      { error: `Discord rejected the message (${res.status})` },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true });
