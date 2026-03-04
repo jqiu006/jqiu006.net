@@ -20,7 +20,6 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,7 +33,6 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
-    setErrorMsg("");
 
     try {
       const res = await fetch('/api/contact', {
@@ -50,9 +48,8 @@ export default function ContactPage() {
 
       setSubmitStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch (err) {
+    } catch {
       setSubmitStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setIsSubmitting(false);
     }
@@ -148,7 +145,7 @@ export default function ContactPage() {
                     <div className="flex items-start gap-2 text-red-600 dark:text-red-400">
                       <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                       <span className="text-sm">
-                        Failed to send: {errorMsg || "please try again or reach me directly via email."}
+                        Sorry, the message failed to send. Please reach me through the Direct Contact options on this page.
                       </span>
                     </div>
                   )}
