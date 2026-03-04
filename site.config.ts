@@ -11,7 +11,7 @@ export const site = {
   galleryLayout: "masonry" as const, // or "grid"
   social: {
     github: "https://github.com/jqiu006",
-    linkedin: "https://linkedin.com/in/jinhui-qiu",
+    linkedin: "https://www.linkedin.com/in/jinhui-qiu-a0b72129b/",
     email: "jqiu006@gmail.com",
   },
   analytics: { 
