@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { site } from "../../../site.config";
 import { BackgroundTitle } from "@/components/background-title";
+import { getCMSAbout, StrapiBlock } from "@/lib/cms";
 
 const skills = {
   "Networking & Security": [
@@ -76,7 +77,19 @@ const timeline = [
   }
 ];
 
-export default function AboutPage() {
+function renderBlocks(blocks: StrapiBlock[]) {
+  return blocks.map((block, i) => {
+    const text = block.children.map(c => c.text).join('');
+    if (!text.trim()) return null;
+    return <p key={i}>{text}</p>;
+  });
+}
+
+export const revalidate = 60;
+
+export default async function AboutPage() {
+  const about = await getCMSAbout();
+
   return (
     <div className="relative">
       <BackgroundTitle />
@@ -98,21 +111,10 @@ export default function AboutPage() {
               <CardTitle>Background</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
-              <p>
-                I&apos;m a dedicated IT professional with a strong focus on network security and infrastructure management.
-                My journey in technology began with a curiosity about how systems work together, which evolved into
-                a passion for building secure, efficient, and scalable solutions.
-              </p>
-              <p>
-                Currently working as an IT Support Specialist, I specialize in network design, virtualization, 
-                and security implementation. I enjoy the challenge of troubleshooting complex issues and finding 
-                innovative solutions that improve both security and user experience.
-              </p>
-              <p>
-                Beyond my technical work, I&apos;m also passionate about digital art and photography, which helps me
-                approach problems with creativity and attention to detail. I believe that the intersection of 
-                technology and creativity leads to the most innovative solutions.
-              </p>
+              {about?.background
+                ? renderBlocks(about.background)
+                : <p className="text-muted-foreground">No content available.</p>
+              }
             </CardContent>
           </Card>
         </section>

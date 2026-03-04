@@ -22,6 +22,22 @@ export interface CMSMedia {
   }
 }
 
+// ─── Strapi Blocks (rich text) ────────────────────────────────────────────────
+
+export interface StrapiTextNode {
+  type: 'text'
+  text: string
+  bold?: boolean
+  italic?: boolean
+  underline?: boolean
+  code?: boolean
+}
+
+export interface StrapiBlock {
+  type: string
+  children: StrapiTextNode[]
+}
+
 // ─── Content types ────────────────────────────────────────────────────────────
 
 export interface CMSProject {
@@ -42,6 +58,10 @@ export interface CMSTechNote {
   PublishDate: string | null
   createdAt: string
   publishedAt: string
+}
+
+export interface CMSAbout {
+  background: StrapiBlock[]
 }
 
 export interface CMSWork {
@@ -177,6 +197,17 @@ export async function getCMSWorkById(documentId: string): Promise<CMSWork | null
       `works?filters[documentId][$eq]=${documentId}&populate=*`
     )
     return data.data[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+// ─── About ────────────────────────────────────────────────────────────────────
+
+export async function getCMSAbout(): Promise<CMSAbout | null> {
+  try {
+    const data = await fetchCMS<{ data: CMSAbout }>('about')
+    return data.data ?? null
   } catch {
     return null
   }
