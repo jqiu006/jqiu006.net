@@ -35,13 +35,14 @@ export default function ContactPage() {
     setSubmitStatus("idle");
 
     try {
-      // Simulate form submission - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For now, just show success message
-      // In production, you would send this to your API endpoint
-      console.log("Form submitted:", formData);
-      
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Failed');
+
       setSubmitStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch {
