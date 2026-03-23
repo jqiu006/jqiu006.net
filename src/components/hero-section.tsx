@@ -212,7 +212,7 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
       <p
         ref={heroSubtitleRef}
         suppressHydrationWarning
-        className="absolute bottom-8 left-8 md:left-16 lg:left-24 text-[clamp(0.875rem,1.5vw,1.1rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
+        className="absolute top-28 left-8 md:left-16 lg:left-24 text-[clamp(0.875rem,1.5vw,1.1rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
       />
 
 
