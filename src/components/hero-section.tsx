@@ -113,128 +113,63 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
     };
   }, [name]);
 
-  // Scroll animation
+  // Scroll animation (title only)
   useEffect(() => {
     const heroTitle = heroTitleRef.current;
-    const heroSubtitle = heroSubtitleRef.current;
-
-    if (!heroTitle || !heroSubtitle) return;
+    if (!heroTitle) return;
 
     let ticking = false;
 
     function updateHeroTitle() {
-      if (!heroTitle || !heroSubtitle) return;
+      if (!heroTitle) return;
 
       const scrollY = Math.max(window.scrollY || window.pageYOffset, 0);
 
       if (scrollY <= 10) {
         setWasAbsolute(true);
-
         heroTitle.style.position = "absolute";
-        heroSubtitle.style.position = "absolute";
-
         heroTitle.style.top = "";
-        heroSubtitle.style.top = "";
         heroTitle.style.left = "";
-        heroSubtitle.style.left = "";
-
         heroTitle.style.transform = "scale(1) translateX(0)";
-        heroSubtitle.style.transform = "scale(1)";
-
-        heroSubtitle.style.opacity = "1";
-
         heroTitle.style.zIndex = "100";
-        heroSubtitle.style.zIndex = "100";
-
         heroTitle.style.color = "";
-
         ticking = false;
         return;
       }
 
       if (scrollY > 10 && wasAbsolute) {
         const titleRect = heroTitle.getBoundingClientRect();
-        const subtitleRect = heroSubtitle.getBoundingClientRect();
-
         heroTitle.style.position = "fixed";
-        heroSubtitle.style.position = "fixed";
-
         heroTitle.style.top = `${titleRect.top}px`;
         heroTitle.style.left = `${titleRect.left}px`;
-
-        heroSubtitle.style.top = `${subtitleRect.top}px`;
-        heroSubtitle.style.left = `${subtitleRect.left}px`;
-
         setWasAbsolute(false);
       }
 
       const progress = Math.min(scrollY / 800, 1);
-
-      const titleScale = 1 + progress * 0.8;
-      const subtitleScale = 1 + progress * 0.4;
-      const translateX = -progress * 6;
-
-      heroTitle.style.transform = `scale(${titleScale}) translateX(${translateX}rem)`;
-      heroSubtitle.style.transform = `scale(${subtitleScale})`;
+      heroTitle.style.transform = `scale(${1 + progress * 0.8}) translateX(${-progress * 6}rem)`;
 
       if (progress >= 1) {
         heroTitle.style.top = "10rem";
-        const viewportWidth = window.innerWidth;
-        if (viewportWidth >= 1024) {
-          heroTitle.style.left = "6rem";
-        } else if (viewportWidth >= 768) {
-          heroTitle.style.left = "4rem";
-        } else {
-          heroTitle.style.left = "2rem";
-        }
+        const vw = window.innerWidth;
+        heroTitle.style.left = vw >= 1024 ? "6rem" : vw >= 768 ? "4rem" : "2rem";
       }
 
       const isDark = document.documentElement.classList.contains("dark");
-      if (isDark) {
-        const lightness = 0.985 - progress * 0.685;
-        heroTitle.style.color = `oklch(${lightness} 0 0)`;
-      } else {
-        const lightness = 0.145 + progress * 0.655;
-        heroTitle.style.color = `oklch(${lightness} 0 0)`;
-      }
+      heroTitle.style.color = isDark
+        ? `oklch(${0.985 - progress * 0.685} 0 0)`
+        : `oklch(${0.145 + progress * 0.655} 0 0)`;
 
-      const fadeOpacity = Math.max(1 - progress * 2, 0);
-      heroSubtitle.style.opacity = `${fadeOpacity}`;
-
-      if (scrollY > 100) {
-        heroTitle.style.zIndex = "0";
-        heroSubtitle.style.zIndex = "0";
-      } else {
-        heroTitle.style.zIndex = "100";
-        heroSubtitle.style.zIndex = "100";
-      }
-
+      heroTitle.style.zIndex = scrollY > 100 ? "0" : "100";
       ticking = false;
     }
 
     function requestTick() {
-      if (!ticking) {
-        window.requestAnimationFrame(updateHeroTitle);
-        ticking = true;
-      }
+      if (!ticking) { window.requestAnimationFrame(updateHeroTitle); ticking = true; }
     }
 
     window.addEventListener("scroll", requestTick);
     window.addEventListener("resize", requestTick);
-
-    const handleLoad = () => {
-      window.scrollTo(0, 0);
-      const scrollY = window.scrollY || window.pageYOffset || 0;
-
-      if (scrollY <= 10) {
-        setWasAbsolute(true);
-        return;
-      }
-
-      setWasAbsolute(true);
-      updateHeroTitle();
-    };
-
+    const handleLoad = () => { window.scrollTo(0, 0); setWasAbsolute(true); };
     window.addEventListener("load", handleLoad);
 
     return () => {
@@ -253,7 +188,7 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
       className="relative min-h-[70vh] overflow-hidden px-8 md:px-16 lg:px-24 pt-40 pb-16 mb-16"
     >
       {/* ASCII terrain background */}
-      <AsciiHeroBg avoidElRef={heroSubtitleRef} />
+      <AsciiHeroBg />
 
       {/* CRT scanline overlay */}
       <div className="scanlines absolute inset-0 pointer-events-none z-10" style={{ opacity: 0.5 }} />
@@ -273,15 +208,11 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
         {nameParts.slice(1).join(" ")}
       </h1>
 
-      {/* Tagline — text managed imperatively via useEffect for scramble-on-theme-change */}
+      {/* Tagline — pinned to hero bottom, text managed via useEffect */}
       <p
         ref={heroSubtitleRef}
         suppressHydrationWarning
-        className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
-        style={{
-          transformOrigin: "left top",
-          transition: "opacity 0.3s ease-out",
-        }}
+        className="absolute bottom-8 left-8 md:left-16 lg:left-24 text-[clamp(0.875rem,1.5vw,1.1rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
       />
 
     </section>

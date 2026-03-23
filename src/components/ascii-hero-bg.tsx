@@ -4,28 +4,19 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 
 const CHARS = " .'`^,:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-const TEAR_CHARS = "@#&%*+=!><";
+const BURST_CHARS = "@#&%*+=!><";
 const BINARY = "01";
 const FONT_SIZE = 12;
-const TEAR_WIDTH = 22;  // px outside clear zone that shows torn chars
-const CLEAR_PAD = 6;    // px of silence inside the avoidRect boundary
 
-interface AsciiHeroBgProps {
-  avoidElRef?: React.RefObject<HTMLParagraphElement | null>;
+interface Disturbance {
+  x: number;
+  y: number;
+  age: number;   // 0 → 1
+  speed: number; // aging rate per frame
+  radius: number;
 }
 
-/** Distance from point (px,py) to the nearest edge of rectangle r.
- *  Returns 0 if the point is inside or on the rect. */
-function distToRect(
-  px: number, py: number,
-  r: { x: number; y: number; w: number; h: number }
-): number {
-  const dx = Math.max(r.x - px, 0, px - (r.x + r.w));
-  const dy = Math.max(r.y - py, 0, py - (r.y + r.h));
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
+export function AsciiHeroBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -9999, y: -9999 });
   const { resolvedTheme } = useTheme();
@@ -38,12 +29,12 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animationId: number;
     let time = 0;
+    const disturbances: Disturbance[] = [];
 
     function resize() {
       if (!canvas) return;
@@ -72,7 +63,6 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
 
     function draw() {
       if (!canvas || !ctx) return;
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const isDark = themeRef.current !== "light";
@@ -82,18 +72,23 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
       const mouseY = mouseRef.current.y;
       const mouseRadius = 150;
 
-      // Compute avoidRect in canvas-local coords (updated every frame)
-      let avoid: { x: number; y: number; w: number; h: number } | null = null;
-      const avoidEl = avoidElRef?.current;
-      if (avoidEl) {
-        const canvasRect = canvas.getBoundingClientRect();
-        const elRect = avoidEl.getBoundingClientRect();
-        const rx = elRect.left - canvasRect.left;
-        const ry = elRect.top - canvasRect.top;
-        // Only apply when the element is actually visible over the canvas
-        if (ry + elRect.height > 0 && ry < canvas.height && elRect.width > 0) {
-          avoid = { x: rx, y: ry, w: elRect.width, h: elRect.height };
-        }
+      // ── Spawn new disturbance (low frequency) ─────────────────────────
+      // ~0.4% chance per frame, max 4 simultaneous
+      if (Math.random() < 0.004 && disturbances.length < 4) {
+        disturbances.push({
+          x: Math.random() * canvas.width,
+          // Only spawn in the terrain zone (bottom 60%)
+          y: canvas.height * (0.4 + Math.random() * 0.55),
+          age: 0,
+          speed: 0.006 + Math.random() * 0.008, // ~80–160 frame lifetime
+          radius: 24 + Math.random() * 32,
+        });
+      }
+
+      // Advance disturbance ages, remove dead ones
+      for (let i = disturbances.length - 1; i >= 0; i--) {
+        disturbances[i].age += disturbances[i].speed;
+        if (disturbances[i].age >= 1) disturbances.splice(i, 1);
       }
 
       ctx.font = `${FONT_SIZE}px monospace`;
@@ -103,46 +98,39 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
         for (let col = 0; col < cols; col++) {
           const x = col * FONT_SIZE;
           const y = row * FONT_SIZE;
-          const cx = x + FONT_SIZE / 2;
-          const cy = y + FONT_SIZE / 2;
 
-          // ── Tear / avoid zone ──────────────────────────────────────────
-          if (avoid) {
-            // Per-cell jagged edge noise for irregular tear silhouette
-            const jag =
-              Math.sin(col * 2.71 + row * 1.91 + time * 0.25) * 3.5 +
-              Math.cos(col * 4.13 - row * 3.37 + time * 0.18) * 2.5;
+          // ── Disturbance overlay ─────────────────────────────────────
+          let disturbed = false;
+          for (const d of disturbances) {
+            const dx = x - d.x;
+            const dy = y - d.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < d.radius) {
+              // Envelope: sin curve so it rises and falls smoothly
+              const envelope = Math.sin(d.age * Math.PI);
+              const localStrength = (1 - dist / d.radius) * envelope;
+              if (localStrength < 0.05) break;
 
-            const dist = distToRect(cx, cy, avoid) + jag;
+              // Outward displacement from disturbance centre
+              const len = dist || 1;
+              const shiftX = (dx / len) * localStrength * 5;
+              const shiftY = (dy / len) * localStrength * 4;
 
-            // Clear zone: silence inside the text rect
-            if (dist < CLEAR_PAD) continue;
+              const burstChar =
+                BURST_CHARS[Math.floor(Math.random() * BURST_CHARS.length)];
+              const alpha = 0.2 + localStrength * 0.8;
 
-            // Torn-edge zone
-            if (dist < TEAR_WIDTH) {
-              const intensity = 1 - (dist - CLEAR_PAD) / (TEAR_WIDTH - CLEAR_PAD);
-              const tearChar =
-                TEAR_CHARS[Math.floor(Math.random() * TEAR_CHARS.length)];
-
-              // Direction from rect center → outward displacement
-              const rcx = avoid.x + avoid.w / 2;
-              const rcy = avoid.y + avoid.h / 2;
-              const vx = cx - rcx;
-              const vy = cy - rcy;
-              const vlen = Math.sqrt(vx * vx + vy * vy) || 1;
-              const shiftX = (vx / vlen) * intensity * 6;
-              const shiftY = (vy / vlen) * intensity * 4;
-
-              const tearAlpha = 0.25 + intensity * 0.75;
               ctx.fillStyle = isDark
-                ? `rgba(0,229,168,${tearAlpha})`
-                : `rgba(0,0,0,${tearAlpha})`;
-              ctx.fillText(tearChar, x + shiftX, y + shiftY);
-              continue;
+                ? `rgba(0,229,168,${alpha})`
+                : `rgba(0,0,0,${alpha})`;
+              ctx.fillText(burstChar, x + shiftX, y + shiftY);
+              disturbed = true;
+              break;
             }
           }
+          if (disturbed) continue;
 
-          // ── Normal terrain ─────────────────────────────────────────────
+          // ── Normal terrain ──────────────────────────────────────────
           const terrainStartRow = rows * 0.4;
           if (row < terrainStartRow) continue;
 
@@ -153,21 +141,19 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
 
           const n = (noise(col, row, time) + 1) / 2;
 
-          // Distance from mouse
           const dxM = x - mouseX;
           const dyM = y - mouseY;
-          const dist = Math.sqrt(dxM * dxM + dyM * dyM);
+          const distM = Math.sqrt(dxM * dxM + dyM * dyM);
 
           let char: string;
           let alpha: number;
 
-          if (dist < mouseRadius) {
-            const influence = 1 - dist / mouseRadius;
+          if (distM < mouseRadius) {
+            const influence = 1 - distM / mouseRadius;
             char = BINARY[Math.floor(Math.random() * BINARY.length)];
             alpha = 0.4 + influence * 0.6;
           } else {
-            const density = terrainNorm;
-            const charIndex = Math.floor(n * density * (CHARS.length - 1));
+            const charIndex = Math.floor(n * terrainNorm * (CHARS.length - 1));
             char = CHARS[charIndex] || " ";
             alpha = 0.08 + terrainNorm * 0.45 + n * 0.15;
           }
@@ -193,12 +179,8 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
-
     const handleMouseLeave = () => {
       mouseRef.current = { x: -9999, y: -9999 };
     };
@@ -212,7 +194,7 @@ export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [avoidElRef]);
+  }, []);
 
   return (
     <canvas
