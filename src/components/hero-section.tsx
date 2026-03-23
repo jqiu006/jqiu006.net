@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { AsciiHeroBg } from "./ascii-hero-bg";
+import { HeroClock, HeroResume } from "./hero-bottom-bar";
 
 interface HeroSectionProps {
   name: string;
@@ -208,12 +209,20 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
         {nameParts.slice(1).join(" ")}
       </h1>
 
-      {/* Tagline — pinned to hero bottom, text managed via useEffect */}
+      {/* Tagline — above the bottom bar */}
       <p
         ref={heroSubtitleRef}
         suppressHydrationWarning
-        className="absolute bottom-8 left-8 md:left-16 lg:left-24 text-[clamp(0.875rem,1.5vw,1.1rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
+        className="absolute bottom-14 left-8 md:left-16 lg:left-24 text-[clamp(0.875rem,1.5vw,1.1rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
       />
+
+      {/* Bottom bar: clock (left) + resume (right) */}
+      <div className="absolute bottom-6 left-8 md:left-16 lg:left-24 z-20">
+        <HeroClock />
+      </div>
+      <div className="absolute bottom-6 right-8 md:right-16 lg:right-24 z-20">
+        <HeroResume />
+      </div>
 
     </section>
   );
