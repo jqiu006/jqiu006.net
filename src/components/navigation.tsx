@@ -26,17 +26,19 @@ export function Navigation() {
       animate={{ y: 0 }}
       className="sticky top-0 z-50 w-full border-b border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     >
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center" aria-label={site.name}>
-          <Image
-            src={logoSrc}
-            alt={site.name}
-            width={36}
-            height={36}
-            className="dark:invert"
-            priority
-          />
-        </Link>
+      <div className="container flex h-16 items-center">
+        <div className="flex-1 flex justify-start">
+          <Link href="/" className="flex items-center" aria-label={site.name}>
+            <Image
+              src={logoSrc}
+              alt={site.name}
+              width={36}
+              height={36}
+              className="dark:invert"
+              priority
+            />
+          </Link>
+        </div>
 
         <nav className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
@@ -54,7 +56,7 @@ export function Navigation() {
           ))}
         </nav>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex-1 flex justify-end items-center space-x-2">
           <ThemeToggle />
         </div>
       </div>
