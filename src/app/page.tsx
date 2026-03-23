@@ -51,7 +51,7 @@ export default async function HomePage() {
       <HeroSection name={site.name} taglineDark={site.taglineDark} taglineLight={site.taglineLight} />
 
       {/* Bar: right below hero, left-aligned */}
-      <div className="flex items-center gap-8 px-8 md:px-16 lg:px-24 py-3 border-b border-border/30 relative z-10">
+      <div className="flex items-center justify-between px-8 md:px-16 lg:px-24 py-3 border-b border-border/30 relative z-10">
         <HeroClock />
         <HeroResume />
       </div>
