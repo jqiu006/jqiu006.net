@@ -5,6 +5,7 @@ import { site } from "../../site.config";
 import { getAllCMSProjects, getAllCMSWorks, getDisplayDate, getCoverUrl } from "@/lib/cms";
 import { formatDate } from "@/lib/utils";
 import { HeroSection } from "@/components/hero-section";
+import { HeroClock, HeroResume } from "@/components/hero-bottom-bar";
 
 export const revalidate = 60;
 
@@ -48,6 +49,12 @@ export default async function HomePage() {
   return (
     <div className="relative">
       <HeroSection name={site.name} taglineDark={site.taglineDark} taglineLight={site.taglineLight} />
+
+      {/* Bottom bar: sits between hero and content */}
+      <div className="flex items-center justify-between px-8 md:px-16 lg:px-24 py-3 border-b border-border/30 relative z-10">
+        <HeroClock />
+        <HeroResume />
+      </div>
 
       <div className="container mx-auto px-4 py-12 relative z-10">
 
