@@ -4,10 +4,28 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 
 const CHARS = " .'`^,:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const TEAR_CHARS = "@#&%*+=!><";
 const BINARY = "01";
 const FONT_SIZE = 12;
+const TEAR_WIDTH = 22;  // px outside clear zone that shows torn chars
+const CLEAR_PAD = 6;    // px of silence inside the avoidRect boundary
 
-export function AsciiHeroBg() {
+interface AsciiHeroBgProps {
+  avoidElRef?: React.RefObject<HTMLParagraphElement | null>;
+}
+
+/** Distance from point (px,py) to the nearest edge of rectangle r.
+ *  Returns 0 if the point is inside or on the rect. */
+function distToRect(
+  px: number, py: number,
+  r: { x: number; y: number; w: number; h: number }
+): number {
+  const dx = Math.max(r.x - px, 0, px - (r.x + r.w));
+  const dy = Math.max(r.y - py, 0, py - (r.y + r.h));
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function AsciiHeroBg({ avoidElRef }: AsciiHeroBgProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -9999, y: -9999 });
   const { resolvedTheme } = useTheme();
@@ -44,13 +62,12 @@ export function AsciiHeroBg() {
 
     function getTerrainHeight(col: number, cols: number, t: number): number {
       const nx = col / cols;
-      // Mountain profile using multiple sine waves
-      const h =
+      return (
         Math.sin(nx * Math.PI * 2 + t * 0.2) * 0.15 +
         Math.sin(nx * Math.PI * 4.5 + t * 0.1) * 0.1 +
         Math.sin(nx * Math.PI * 7 + t * 0.15) * 0.06 +
-        Math.cos(nx * Math.PI * 3 + t * 0.12) * 0.08;
-      return h; // range roughly -0.4 to 0.4
+        Math.cos(nx * Math.PI * 3 + t * 0.12) * 0.08
+      );
     }
 
     function draw() {
@@ -65,6 +82,20 @@ export function AsciiHeroBg() {
       const mouseY = mouseRef.current.y;
       const mouseRadius = 150;
 
+      // Compute avoidRect in canvas-local coords (updated every frame)
+      let avoid: { x: number; y: number; w: number; h: number } | null = null;
+      const avoidEl = avoidElRef?.current;
+      if (avoidEl) {
+        const canvasRect = canvas.getBoundingClientRect();
+        const elRect = avoidEl.getBoundingClientRect();
+        const rx = elRect.left - canvasRect.left;
+        const ry = elRect.top - canvasRect.top;
+        // Only apply when the element is actually visible over the canvas
+        if (ry + elRect.height > 0 && ry < canvas.height && elRect.width > 0) {
+          avoid = { x: rx, y: ry, w: elRect.width, h: elRect.height };
+        }
+      }
+
       ctx.font = `${FONT_SIZE}px monospace`;
       ctx.textBaseline = "top";
 
@@ -72,55 +103,80 @@ export function AsciiHeroBg() {
         for (let col = 0; col < cols; col++) {
           const x = col * FONT_SIZE;
           const y = row * FONT_SIZE;
+          const cx = x + FONT_SIZE / 2;
+          const cy = y + FONT_SIZE / 2;
 
-          // Terrain: only bottom 60% of canvas
+          // ── Tear / avoid zone ──────────────────────────────────────────
+          if (avoid) {
+            // Per-cell jagged edge noise for irregular tear silhouette
+            const jag =
+              Math.sin(col * 2.71 + row * 1.91 + time * 0.25) * 3.5 +
+              Math.cos(col * 4.13 - row * 3.37 + time * 0.18) * 2.5;
+
+            const dist = distToRect(cx, cy, avoid) + jag;
+
+            // Clear zone: silence inside the text rect
+            if (dist < CLEAR_PAD) continue;
+
+            // Torn-edge zone
+            if (dist < TEAR_WIDTH) {
+              const intensity = 1 - (dist - CLEAR_PAD) / (TEAR_WIDTH - CLEAR_PAD);
+              const tearChar =
+                TEAR_CHARS[Math.floor(Math.random() * TEAR_CHARS.length)];
+
+              // Direction from rect center → outward displacement
+              const rcx = avoid.x + avoid.w / 2;
+              const rcy = avoid.y + avoid.h / 2;
+              const vx = cx - rcx;
+              const vy = cy - rcy;
+              const vlen = Math.sqrt(vx * vx + vy * vy) || 1;
+              const shiftX = (vx / vlen) * intensity * 6;
+              const shiftY = (vy / vlen) * intensity * 4;
+
+              const tearAlpha = 0.25 + intensity * 0.75;
+              ctx.fillStyle = isDark
+                ? `rgba(0,229,168,${tearAlpha})`
+                : `rgba(0,0,0,${tearAlpha})`;
+              ctx.fillText(tearChar, x + shiftX, y + shiftY);
+              continue;
+            }
+          }
+
+          // ── Normal terrain ─────────────────────────────────────────────
           const terrainStartRow = rows * 0.4;
           if (row < terrainStartRow) continue;
 
-          // Normalized row within terrain area (0 = top of terrain zone, 1 = bottom)
           const terrainNorm = (row - terrainStartRow) / (rows - terrainStartRow);
-
-          // Get mountain height at this column
           const mountainOffset = getTerrainHeight(col, cols, time);
-          // threshold: rows below this value show characters
           const threshold = 0.3 + mountainOffset;
-
           if (terrainNorm < threshold * 0.6) continue;
 
-          // Noise value for character selection
-          const n = (noise(col, row, time) + 1) / 2; // 0 to 1
+          const n = (noise(col, row, time) + 1) / 2;
 
           // Distance from mouse
-          const dx = x - mouseX;
-          const dy = y - mouseY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dxM = x - mouseX;
+          const dyM = y - mouseY;
+          const dist = Math.sqrt(dxM * dxM + dyM * dyM);
 
           let char: string;
           let alpha: number;
 
           if (dist < mouseRadius) {
-            // Binary lens distortion zone
             const influence = 1 - dist / mouseRadius;
             char = BINARY[Math.floor(Math.random() * BINARY.length)];
             alpha = 0.4 + influence * 0.6;
           } else {
-            // Terrain chars: denser at bottom, sparser near top of terrain
             const density = terrainNorm;
             const charIndex = Math.floor(n * density * (CHARS.length - 1));
             char = CHARS[charIndex] || " ";
-
-            // Alpha based on depth + noise
             alpha = 0.08 + terrainNorm * 0.45 + n * 0.15;
           }
 
           if (char === " ") continue;
 
-          if (isDark) {
-            ctx.fillStyle = `rgba(0, 229, 168, ${alpha})`;
-          } else {
-            ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-          }
-
+          ctx.fillStyle = isDark
+            ? `rgba(0,229,168,${alpha})`
+            : `rgba(0,0,0,${alpha})`;
           ctx.fillText(char, x, y);
         }
       }
@@ -156,7 +212,7 @@ export function AsciiHeroBg() {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, []);
+  }, [avoidElRef]);
 
   return (
     <canvas

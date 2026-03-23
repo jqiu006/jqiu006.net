@@ -253,7 +253,7 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
       className="relative min-h-[70vh] overflow-hidden px-8 md:px-16 lg:px-24 pt-40 pb-16 mb-16"
     >
       {/* ASCII terrain background */}
-      <AsciiHeroBg />
+      <AsciiHeroBg avoidElRef={heroSubtitleRef} />
 
       {/* CRT scanline overlay */}
       <div className="scanlines absolute inset-0 pointer-events-none z-10" style={{ opacity: 0.5 }} />
@@ -277,13 +277,10 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
       <p
         ref={heroSubtitleRef}
         suppressHydrationWarning
-        className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20 px-2 py-1"
+        className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
         style={{
           transformOrigin: "left top",
           transition: "opacity 0.3s ease-out",
-          background: "oklch(0.145 0 0 / 55%)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
         }}
       />
 
