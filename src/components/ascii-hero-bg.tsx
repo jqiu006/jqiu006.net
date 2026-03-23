@@ -4,17 +4,8 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 
 const CHARS = " .'`^,:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-const BURST_CHARS = "@#&%*+=!><";
 const BINARY = "01";
 const FONT_SIZE = 12;
-
-interface Disturbance {
-  x: number;
-  y: number;
-  age: number;   // 0 → 1
-  speed: number; // aging rate per frame
-  radius: number;
-}
 
 export function AsciiHeroBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,7 +25,6 @@ export function AsciiHeroBg() {
 
     let animationId: number;
     let time = 0;
-    const disturbances: Disturbance[] = [];
 
     function resize() {
       if (!canvas) return;
@@ -72,25 +62,6 @@ export function AsciiHeroBg() {
       const mouseY = mouseRef.current.y;
       const mouseRadius = 150;
 
-      // ── Spawn new disturbance (low frequency) ─────────────────────────
-      // ~0.4% chance per frame, max 4 simultaneous
-      if (Math.random() < 0.004 && disturbances.length < 4) {
-        disturbances.push({
-          x: Math.random() * canvas.width,
-          // Only spawn in the terrain zone (bottom 60%)
-          y: canvas.height * (0.4 + Math.random() * 0.55),
-          age: 0,
-          speed: 0.006 + Math.random() * 0.008, // ~80–160 frame lifetime
-          radius: 24 + Math.random() * 32,
-        });
-      }
-
-      // Advance disturbance ages, remove dead ones
-      for (let i = disturbances.length - 1; i >= 0; i--) {
-        disturbances[i].age += disturbances[i].speed;
-        if (disturbances[i].age >= 1) disturbances.splice(i, 1);
-      }
-
       ctx.font = `${FONT_SIZE}px monospace`;
       ctx.textBaseline = "top";
 
@@ -99,57 +70,24 @@ export function AsciiHeroBg() {
           const x = col * FONT_SIZE;
           const y = row * FONT_SIZE;
 
-          // ── Disturbance overlay ─────────────────────────────────────
-          let disturbed = false;
-          for (const d of disturbances) {
-            const dx = x - d.x;
-            const dy = y - d.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < d.radius) {
-              // Envelope: sin curve so it rises and falls smoothly
-              const envelope = Math.sin(d.age * Math.PI);
-              const localStrength = (1 - dist / d.radius) * envelope;
-              if (localStrength < 0.05) break;
-
-              // Outward displacement from disturbance centre
-              const len = dist || 1;
-              const shiftX = (dx / len) * localStrength * 5;
-              const shiftY = (dy / len) * localStrength * 4;
-
-              const burstChar =
-                BURST_CHARS[Math.floor(Math.random() * BURST_CHARS.length)];
-              const alpha = 0.2 + localStrength * 0.8;
-
-              ctx.fillStyle = isDark
-                ? `rgba(0,229,168,${alpha})`
-                : `rgba(0,0,0,${alpha})`;
-              ctx.fillText(burstChar, x + shiftX, y + shiftY);
-              disturbed = true;
-              break;
-            }
-          }
-          if (disturbed) continue;
-
-          // ── Normal terrain ──────────────────────────────────────────
           const terrainStartRow = rows * 0.4;
           if (row < terrainStartRow) continue;
 
           const terrainNorm = (row - terrainStartRow) / (rows - terrainStartRow);
           const mountainOffset = getTerrainHeight(col, cols, time);
-          const threshold = 0.3 + mountainOffset;
-          if (terrainNorm < threshold * 0.6) continue;
+          if (terrainNorm < (0.3 + mountainOffset) * 0.6) continue;
 
           const n = (noise(col, row, time) + 1) / 2;
 
-          const dxM = x - mouseX;
-          const dyM = y - mouseY;
-          const distM = Math.sqrt(dxM * dxM + dyM * dyM);
+          const dx = x - mouseX;
+          const dy = y - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
           let char: string;
           let alpha: number;
 
-          if (distM < mouseRadius) {
-            const influence = 1 - distM / mouseRadius;
+          if (dist < mouseRadius) {
+            const influence = 1 - dist / mouseRadius;
             char = BINARY[Math.floor(Math.random() * BINARY.length)];
             alpha = 0.4 + influence * 0.6;
           } else {
