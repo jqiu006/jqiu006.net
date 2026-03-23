@@ -245,3 +245,38 @@ code[data-theme*=' '], code[data-theme*=' '] span {
 .scrambling {
   cursor: crosshair;
 }
+
+/* Terminal divider */
+.terminal-divider {
+  border-top: 1px solid oklch(0.7 0.15 160 / 20%);
+  position: relative;
+  margin: 2rem 0;
+}
+
+.terminal-divider::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -0.65rem;
+  left: 0;
+  font-family: 'VT323', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: var(--background);
+  padding: 0 0.5rem;
+}
+
+/* Terminal index badge */
+.term-idx {
+  font-family: 'VT323', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+/* Animate fade-in-up for page content */
+.page-content {
+  animation: fade-in-up 0.4s ease both;
+}

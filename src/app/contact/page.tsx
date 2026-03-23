@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { site } from "../../../site.config";
 import { BackgroundTitle } from "@/components/background-title";
+import { TerminalPageHeader } from "@/components/terminal-page-header";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -61,20 +62,18 @@ export default function ContactPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <section className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">Get In Touch</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have a question, want to collaborate, or just want to say hello? 
-            I&apos;d love to hear from you.
-          </p>
-        </section>
+        <TerminalPageHeader
+          sysLabel={"// CONTACT.INIT"}
+          title="Get In Touch"
+          subtitle="Open for collaboration · Response within 48h"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Form */}
           <section>
             <Card>
               <CardHeader>
-                <CardTitle>Send a Message</CardTitle>
+                <CardTitle className="sys-label text-base">{"// SEND_MSG"}</CardTitle>
                 <CardDescription>
                   Fill out the form below and I&apos;ll get back to you as soon as possible.
                 </CardDescription>
@@ -83,83 +82,87 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name" className="font-mono uppercase text-xs tracking-wider">Name</Label>
                       <Input
                         id="name"
                         name="name"
                         type="text"
-                        placeholder="Your name"
+                        placeholder="> Your name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
+                        className="font-mono rounded-none"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="font-mono uppercase text-xs tracking-wider">Email</Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="your.email@example.com"
+                        placeholder="> your@email.com"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
+                        className="font-mono rounded-none"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject" className="font-mono uppercase text-xs tracking-wider">Subject</Label>
                     <Input
                       id="subject"
                       name="subject"
                       type="text"
-                      placeholder="What's this about?"
+                      placeholder="> Subject"
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
+                      className="font-mono rounded-none"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
+                    <Label htmlFor="message" className="font-mono uppercase text-xs tracking-wider">Message</Label>
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell me more about your project, question, or just say hello..."
+                      placeholder="> Your message..."
                       rows={6}
                       value={formData.message}
                       onChange={handleInputChange}
                       required
+                      className="font-mono rounded-none"
                     />
                   </div>
 
                   {submitStatus === "success" && (
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-mono text-sm">
                       <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">Message sent successfully! I&apos;ll get back to you soon.</span>
+                      <span>{"[ MSG.SENT // I'll get back to you soon ]"}</span>
                     </div>
                   )}
 
                   {submitStatus === "error" && (
-                    <div className="flex items-start gap-2 text-red-600 dark:text-red-400">
+                    <div className="flex items-start gap-2 text-red-600 dark:text-red-400 font-mono text-sm">
                       <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                      <span className="text-sm">
-                        Sorry, the message failed to send. Please reach me through the Direct Contact options on this page.
+                      <span>
+                        {"[ ERR // message failed — use direct contact ]"}
                       </span>
                     </div>
                   )}
 
-                  <Button type="submit" disabled={isSubmitting} className="w-full">
+                  <Button type="submit" disabled={isSubmitting} className="w-full font-mono">
                     {isSubmitting ? (
                       <>
                         <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Sending...
+                        {"[ SENDING... ]"}
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Send Message
+                        {"[ SEND.MSG ]"}
                       </>
                     )}
                   </Button>
@@ -173,7 +176,7 @@ export default function ContactPage() {
             {/* Direct Contact */}
             <Card>
               <CardHeader>
-                <CardTitle>Direct Contact</CardTitle>
+                <CardTitle className="sys-label text-base">{"// DIRECT.CONTACT"}</CardTitle>
                 <CardDescription>
                   Here are other ways to connect.
                 </CardDescription>
@@ -182,10 +185,10 @@ export default function ContactPage() {
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-accent" />
                   <div>
-                    <p className="font-medium">Email</p>
-                    <Link 
+                    <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Email</p>
+                    <Link
                       href={`mailto:${site.social.email}`}
-                      className="text-muted-foreground hover:text-accent transition-colors"
+                      className="text-muted-foreground hover:text-accent transition-colors font-mono text-sm"
                     >
                       {site.social.email}
                     </Link>
@@ -197,7 +200,7 @@ export default function ContactPage() {
             {/* Social Links */}
             <Card>
               <CardHeader>
-                <CardTitle>Social & Professional</CardTitle>
+                <CardTitle className="sys-label text-base">{"// SOCIAL.LINKS"}</CardTitle>
                 <CardDescription>
                   Connect with me on these platforms to see more of my work.
                 </CardDescription>
@@ -206,27 +209,27 @@ export default function ContactPage() {
                 <div className="flex items-center gap-3">
                   <Github className="h-5 w-5 text-accent" />
                   <div>
-                    <p className="font-medium">GitHub</p>
-                    <Link 
+                    <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">GitHub</p>
+                    <Link
                       href={site.social.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-accent transition-colors"
+                      className="text-muted-foreground hover:text-accent transition-colors font-mono text-sm"
                     >
                       View my repositories and contributions
                     </Link>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Linkedin className="h-5 w-5 text-accent" />
                   <div>
-                    <p className="font-medium">LinkedIn</p>
-                    <Link 
+                    <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">LinkedIn</p>
+                    <Link
                       href={site.social.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-accent transition-colors"
+                      className="text-muted-foreground hover:text-accent transition-colors font-mono text-sm"
                     >
                       Professional profile and network
                     </Link>
@@ -234,38 +237,6 @@ export default function ContactPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Response Time */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Response Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  I typically respond to messages within 24-48 hours. For urgent matters, 
-                  please mention it in your subject line or reach out via email directly.
-                </p>
-              </CardContent>
-            </Card> */}
-
-            {/* Collaboration */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Collaboration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  I'm always interested in discussing:
-                </p>
-                <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>Network security projects</li>
-                  <li>Infrastructure automation</li>
-                  <li>Homelab setups and optimization</li>
-                  <li>Creative technology projects</li>
-                  <li>Knowledge sharing and mentoring</li>
-                </ul>
-              </CardContent>
-            </Card> */}
           </section>
         </div>
       </div>

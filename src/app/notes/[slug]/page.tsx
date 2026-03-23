@@ -57,26 +57,35 @@ export default async function NotePage({ params }: Props) {
       <div className="max-w-4xl mx-auto">
         <Link
           href="/notes"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-accent transition-colors mb-8"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Notes
+          <ArrowLeft className="h-3 w-3" />
+          {"cd ../notes"}
         </Link>
 
         <header className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">{note.Title}</h1>
+          <p className="sys-label mb-3">{"// NOTE.DETAIL"}</p>
 
           {getDisplayDate(note) && (
-            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="font-mono sys-label">
                 <time dateTime={getDisplayDate(note)!}>
                   {formatDate(getDisplayDate(note)!)}
                 </time>
-              </div>
+              </span>
             </div>
           )}
+
+          <h1
+            className="text-4xl md:text-5xl font-bold"
+            style={{ fontFamily: "'VT323', sans-serif" }}
+          >
+            {note.Title}
+          </h1>
         </header>
+
+        <div className="terminal-divider my-8" data-label="[ CONTENT ]" />
 
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <MDXContent source={note.Note} />
@@ -85,10 +94,10 @@ export default async function NotePage({ params }: Props) {
         <footer className="mt-16 pt-8 border-t border-border">
           <Link
             href="/notes"
-            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+            className="inline-flex items-center gap-2 font-mono text-sm text-accent hover:text-accent/80 transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to all notes
+            <ArrowLeft className="h-3 w-3" />
+            {"cd ../notes"}
           </Link>
         </footer>
       </div>

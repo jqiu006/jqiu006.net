@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { getAllCMSProjects, getCMSProjectById, getDisplayDate } from "@/lib/cms";
 import { MDXContent } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
@@ -49,30 +47,36 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <div className="container mx-auto px-4 py-12">
       <div>
         <div className="mb-8">
-          <Link href="/projects">
-            <Button variant="ghost" className="pl-0">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Projects
-            </Button>
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-accent transition-colors"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            {"cd ../projects"}
           </Link>
         </div>
 
         <div className="mb-12">
-          <div className="space-y-4">
+          <p className="sys-label mb-3">{"// PROJECT.DETAIL"}</p>
+          <div className="space-y-3">
             {getDisplayDate(project) && (
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3 w-3 text-muted-foreground" />
+                <span className="font-mono sys-label">
                   {formatDate(getDisplayDate(project)!)}
-                </div>
+                </span>
               </div>
             )}
-
-            <h1 className="text-4xl font-bold tracking-tight">{project.Title}</h1>
+            <h1
+              className="text-4xl md:text-5xl font-bold tracking-tight"
+              style={{ fontFamily: "'VT323', sans-serif" }}
+            >
+              {project.Title}
+            </h1>
           </div>
         </div>
 
-        <Separator className="mb-12" />
+        <div className="terminal-divider my-8" data-label="[ CONTENT ]" />
 
         <div className="max-w-4xl">
           <article className="prose prose-neutral dark:prose-invert max-w-none">

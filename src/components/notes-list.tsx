@@ -26,10 +26,10 @@ export function NotesList({ notes }: NotesListProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <input
           type="text"
-          placeholder="Search notes..."
+          placeholder="> SEARCH_NOTES..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 focus:border-accent/50 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 rounded-none border border-accent/30 bg-transparent text-sm font-mono placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
         />
         {query && (
           <button
@@ -42,35 +42,45 @@ export function NotesList({ notes }: NotesListProps) {
       </div>
 
       {/* Results */}
-      <div className="grid gap-6">
+      <div className="grid gap-2">
         {filtered.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground font-mono">
               {query ? `No notes matching "${query}"` : "No notes available yet."}
             </p>
           </div>
         ) : (
-          filtered.map((note) => (
+          filtered.map((note, index) => (
             <Link
               key={note.documentId}
               href={`/notes/${note.documentId}`}
-              className="group block p-6 border border-border rounded-lg hover:border-accent/50 transition-all duration-200 hover:shadow-md"
+              className="group block px-4 py-4 border border-border border-l-2 border-l-border hover:border-l-accent hover:border-accent/40 transition-all duration-200"
             >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors">
-                    {note.Title}
-                  </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <span className="term-idx shrink-0 mt-0.5">
+                    [{(index + 1).toString().padStart(3, '0')}]
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-accent opacity-0 group-hover:opacity-100 transition-opacity shrink-0 font-mono text-sm">
+                      {">"}
+                    </span>
+                    <h3 className="text-base font-mono font-medium group-hover:text-accent transition-colors truncate">
+                      {note.Title}
+                    </h3>
+                  </div>
+                </div>
+                <div className="pl-10 sm:pl-0 shrink-0">
                   {getDisplayDate(note) ? (
                     <time
                       dateTime={getDisplayDate(note)!}
-                      className="text-sm text-muted-foreground"
+                      className="text-xs font-mono text-muted-foreground tabular-nums"
                     >
                       {formatDate(getDisplayDate(note)!)}
                     </time>
                   ) : (
-                    <span className="text-sm text-muted-foreground/50 italic">
-                      No date
+                    <span className="text-xs font-mono text-muted-foreground/50">
+                      —
                     </span>
                   )}
                 </div>
@@ -81,7 +91,7 @@ export function NotesList({ notes }: NotesListProps) {
       </div>
 
       {query && filtered.length > 0 && (
-        <p className="mt-4 text-xs text-muted-foreground">
+        <p className="mt-4 text-xs font-mono text-muted-foreground">
           {filtered.length} result{filtered.length !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
         </p>
       )}

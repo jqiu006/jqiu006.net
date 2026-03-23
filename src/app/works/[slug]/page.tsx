@@ -61,26 +61,35 @@ export default async function WorkPage({ params }: Props) {
       <div className="max-w-6xl mx-auto">
         <Link
           href="/works"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-accent transition-colors mb-8"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Works
+          <ArrowLeft className="h-3 w-3" />
+          {"cd ../works"}
         </Link>
 
         <header className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">{work.Title}</h1>
+          <p className="sys-label mb-3">{"// WORK.DETAIL"}</p>
 
           {getDisplayDate(work) && (
-            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="font-mono sys-label">
                 <time dateTime={getDisplayDate(work)!}>
                   {formatDate(getDisplayDate(work)!)}
                 </time>
-              </div>
+              </span>
             </div>
           )}
+
+          <h1
+            className="text-4xl md:text-5xl font-bold"
+            style={{ fontFamily: "'VT323', sans-serif" }}
+          >
+            {work.Title}
+          </h1>
         </header>
+
+        <div className="terminal-divider my-8" data-label="[ CONTENT ]" />
 
         {/* Detail content — Strapi embeds images/videos as markdown links with absolute URLs */}
         <article className="prose prose-neutral dark:prose-invert max-w-none mb-12">
@@ -90,10 +99,10 @@ export default async function WorkPage({ params }: Props) {
         <footer className="pt-8 border-t border-border">
           <Link
             href="/works"
-            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+            className="inline-flex items-center gap-2 font-mono text-sm text-accent hover:text-accent/80 transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to all works
+            <ArrowLeft className="h-3 w-3" />
+            {"cd ../works"}
           </Link>
         </footer>
       </div>

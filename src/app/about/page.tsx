@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { site } from "../../../site.config";
 import { BackgroundTitle } from "@/components/background-title";
 import { getCMSAbout, StrapiBlock } from "@/lib/cms";
+import { TerminalPageHeader } from "@/components/terminal-page-header";
 
 const skills = {
   "Networking & Security": [
@@ -96,16 +97,15 @@ export default async function AboutPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <section className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">About Me</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            IT professional passionate about network security, infrastructure automation, 
-            and creative problem-solving through technology.
-          </p>
-        </section>
+        <TerminalPageHeader
+          sysLabel={"// ABOUT.SYS"}
+          title="About Me"
+          subtitle="IT Professional · Security-Minded · Creative Technologist"
+        />
 
         {/* Bio */}
         <section className="mb-16">
+          <p className="sys-label mb-2">{"// BIO.TXT"}</p>
           <Card>
             <CardHeader>
               <CardTitle>Background</CardTitle>
@@ -121,7 +121,8 @@ export default async function AboutPage() {
 
         {/* Skills */}
         <section className="mb-16">
-          <h2 className="mb-8 text-2xl font-semibold">Skills & Expertise</h2>
+          <p className="sys-label mb-2">{"// SKILLS.DAT"}</p>
+          <h2 className="mb-8 text-2xl font-semibold">Skills &amp; Expertise</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(skills).map(([category, skillList]) => (
               <Card key={category}>
@@ -131,7 +132,7 @@ export default async function AboutPage() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {skillList.map((skill) => (
-                      <Badge key={skill} variant="secondary">
+                      <Badge key={skill} variant="secondary" className="font-mono text-xs">
                         {skill}
                       </Badge>
                     ))}
@@ -144,14 +145,18 @@ export default async function AboutPage() {
 
         {/* Timeline */}
         <section className="mb-16">
+          <p className="sys-label mb-2">{"// WORK.HISTORY"}</p>
           <h2 className="mb-8 text-2xl font-semibold">Experience</h2>
           <div className="space-y-6">
             {timeline.map((item, index) => (
               <Card key={index}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <Badge variant="outline">{item.year}</Badge>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="term-idx">[{(index + 1).toString().padStart(3, '0')}]</span>
+                      {item.title}
+                    </CardTitle>
+                    <Badge variant="outline" className="font-mono text-xs">{item.year}</Badge>
                   </div>
                   <CardDescription className="text-base font-medium">
                     {item.company}
@@ -167,6 +172,7 @@ export default async function AboutPage() {
 
         {/* Currently Learning */}
         <section className="mb-16">
+          <p className="sys-label mb-2">{"// LEARNING.QUEUE"}</p>
           <Card>
             <CardHeader>
               <CardTitle>Currently Learning</CardTitle>
@@ -177,7 +183,7 @@ export default async function AboutPage() {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {site.currentlyLearning.map((item) => (
-                  <Badge key={item} variant="outline">
+                  <Badge key={item} variant="outline" className="font-mono text-xs">
                     {item}
                   </Badge>
                 ))}
@@ -187,7 +193,8 @@ export default async function AboutPage() {
         </section>
 
         {/* Contact & Resume */}
-        <section className="text-center">
+        <section>
+          <p className="sys-label mb-2">{"// CONNECT.INIT"}</p>
           <Card>
             <CardHeader>
               <CardTitle>Let&apos;s Connect</CardTitle>

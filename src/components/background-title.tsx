@@ -24,17 +24,15 @@ export function BackgroundTitle() {
 
   return (
     <div
-      className="fixed top-40 left-8 md:left-16 lg:left-24 text-[clamp(4rem,12vw,8rem)] font-black leading-[0.9] tracking-[-0.03em] pointer-events-none select-none z-0"
+      className="fixed inset-0 pointer-events-none select-none z-0"
       style={{
-        transformOrigin: 'left top',
-        transform: 'scale(1.8) translateX(-6rem)',
-        color: isDark ? 'oklch(0.3 0 0)' : 'oklch(0.8 0 0)',
-        transition: 'color 0.3s ease-out',
+        backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+        color: isDark ? "oklch(0.8 0.15 160)" : "oklch(0.4 0 0)",
+        opacity: isDark ? 0.04 : 0.03,
+        transition: "color 0.3s ease-out, opacity 0.3s ease-out",
       }}
       aria-hidden="true"
-    >
-      Jinhui<br />
-      Qiu
-    </div>
+    />
   );
 }
