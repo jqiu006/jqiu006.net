@@ -277,10 +277,11 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
       <p
         ref={heroSubtitleRef}
         suppressHydrationWarning
-        className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
+        className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-accent/70 max-w-[600px] pointer-events-none font-mono z-20"
         style={{
           transformOrigin: "left top",
           transition: "opacity 0.3s ease-out",
+          textShadow: "0 0 20px oklch(0.7 0.15 160 / 40%)",
         }}
       />
 
