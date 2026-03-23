@@ -14,13 +14,55 @@ const SCRAMBLE_CHARS = "!<>-_\\/[]{}—=+*^?#________";
 
 export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProps) {
   const { resolvedTheme } = useTheme();
-  const tagline = resolvedTheme === "light" ? taglineLight : taglineDark;
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const [wasAbsolute, setWasAbsolute] = useState(true);
+  const taglineInitialized = useRef(false);
 
-  // Scramble effect
+  // Tagline: set on first theme resolve, scramble on subsequent theme changes
+  useEffect(() => {
+    const el = heroSubtitleRef.current;
+    if (!el || !resolvedTheme) return;
+
+    const newTagline = resolvedTheme === "light" ? taglineLight : taglineDark;
+
+    if (!taglineInitialized.current) {
+      // First time: just set the text silently
+      el.textContent = newTagline;
+      taglineInitialized.current = true;
+      return;
+    }
+
+    // Theme toggled: scramble from current text to new tagline
+    const oldText = el.textContent || "";
+    const length = Math.max(oldText.length, newTagline.length);
+    let frameId: number | null = null;
+    let iteration = 0;
+
+    function animate() {
+      const result = Array.from({ length }, (_, i) => {
+        const target = newTagline[i] ?? "";
+        if (target === " " || target === "") return target;
+        if (i < Math.floor(iteration)) return target;
+        return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+      }).join("");
+
+      el!.textContent = result;
+
+      if (iteration < length) {
+        iteration += 0.6;
+        frameId = requestAnimationFrame(animate);
+      } else {
+        el!.textContent = newTagline;
+      }
+    }
+
+    frameId = requestAnimationFrame(animate);
+    return () => { if (frameId !== null) cancelAnimationFrame(frameId); };
+  }, [resolvedTheme, taglineDark, taglineLight]);
+
+  // Scramble title on hover
   useEffect(() => {
     const el = heroTitleRef.current;
     if (!el) return;
@@ -231,17 +273,16 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
         {nameParts.slice(1).join(" ")}
       </h1>
 
-      {/* Tagline */}
+      {/* Tagline — text managed imperatively via useEffect for scramble-on-theme-change */}
       <p
         ref={heroSubtitleRef}
+        suppressHydrationWarning
         className="absolute top-[320px] md:top-[360px] lg:top-[400px] left-8 md:left-16 lg:left-24 text-[clamp(1rem,2vw,1.25rem)] text-muted-foreground max-w-[600px] pointer-events-none font-mono z-20"
         style={{
           transformOrigin: "left top",
           transition: "opacity 0.3s ease-out",
         }}
-      >
-        {tagline}
-      </p>
+      />
 
     </section>
   );
