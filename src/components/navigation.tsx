@@ -22,11 +22,11 @@ export function Navigation() {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 w-full border-b border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     >
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="font-bold text-xl">{site.name}</span>
+          <span className="font-mono font-bold text-xl tracking-wide">{site.name}</span>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -34,13 +34,13 @@ export function Navigation() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-medium transition-colors hover:text-accent ${
+              className={`text-sm font-medium font-mono tracking-wide transition-colors hover:text-accent ${
                 pathname === item.href
                   ? "text-accent"
                   : "text-muted-foreground"
               }`}
             >
-              {item.label}
+              {pathname === item.href ? "> " : ""}{item.label}
             </Link>
           ))}
         </nav>

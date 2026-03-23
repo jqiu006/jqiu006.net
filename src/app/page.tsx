@@ -67,6 +67,7 @@ export default async function HomePage() {
         {/* Quick Links */}
         <section className="mb-16 animate-fade-in-up">
           <div>
+            <p className="sys-label mb-2">{"// NAVIGATION.MAP"}</p>
             <h2 className="mb-8 text-3xl font-bold tracking-tight">Explore</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quickLinks.map((link, index) => {
@@ -92,6 +93,7 @@ export default async function HomePage() {
         {/* Featured Projects */}
         <section className="mb-16">
           <div>
+            <p className="sys-label mb-2">{"// PROJECT.LOG"}</p>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-3xl font-bold tracking-tight">Featured Projects</h2>
               <Link
@@ -136,6 +138,7 @@ export default async function HomePage() {
         {/* Featured Works */}
         <section className="mb-16">
           <div>
+            <p className="sys-label mb-2">{"// CREATIVE.OUTPUT"}</p>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-3xl font-bold tracking-tight">Featured Works</h2>
               <Link
