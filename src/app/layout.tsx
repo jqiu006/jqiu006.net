@@ -78,6 +78,9 @@ export default function RootLayout({
           <div className="relative flex min-h-screen flex-col">
             <Navigation />
             <main className="flex-1">{children}</main>
+            <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
+              <span className="sys-label opacity-40">[ SYS // jqiu006.net ]</span>
+            </div>
           </div>
         </ThemeProvider>
       </body>

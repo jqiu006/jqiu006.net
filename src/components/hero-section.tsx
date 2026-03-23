@@ -243,10 +243,6 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
         {tagline}
       </p>
 
-      {/* Bottom-left terminal system label */}
-      <div className="absolute bottom-6 left-8 md:left-16 lg:left-24 z-20">
-        <span className="sys-label opacity-50">[ SYS // jqiu006.net ]</span>
-      </div>
     </section>
   );
 }

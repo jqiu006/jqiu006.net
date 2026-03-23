@@ -5,7 +5,6 @@ import { site } from "../../site.config";
 import { getAllCMSProjects, getAllCMSWorks, getDisplayDate, getCoverUrl } from "@/lib/cms";
 import { formatDate } from "@/lib/utils";
 import { HeroSection } from "@/components/hero-section";
-import { DotField } from "@/components/dot-field";
 
 export const revalidate = 60;
 
@@ -48,18 +47,6 @@ export default async function HomePage() {
 
   return (
     <div className="relative">
-      {/* Particle field: spans hero + content, fades out at bottom */}
-      <div
-        className="absolute inset-x-0 top-0 pointer-events-none"
-        style={{
-          height: '130vh',
-          maskImage: 'linear-gradient(to bottom, black 45%, transparent 90%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 45%, transparent 90%)',
-        }}
-      >
-        <DotField />
-      </div>
-
       <HeroSection name={site.name} taglineDark={site.taglineDark} taglineLight={site.taglineLight} />
 
       <div className="container mx-auto px-4 py-12 relative z-10">
