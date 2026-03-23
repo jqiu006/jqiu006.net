@@ -29,7 +29,6 @@ export function HeroClock() {
 export function HeroResume() {
   const [href, setHref] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
-  // Scramble state
   const labelRef = useRef<HTMLSpanElement>(null);
   const frameRef = useRef<number | null>(null);
   const SCRAMBLE = "!<>-_\\/[]{}—=+*^?#";
@@ -39,14 +38,13 @@ export function HeroResume() {
     fetch(`${STRAPI_BASE}/api/resume?populate=*`)
       .then((r) => r.json())
       .then((json) => {
-        // Strapi v5: data.file.url  |  fallback: data.attributes.file.data.attributes.url
         const url =
           json?.data?.file?.url ??
           json?.data?.attributes?.file?.data?.attributes?.url ??
           null;
         if (url) setHref(url.startsWith("http") ? url : `${STRAPI_BASE}${url}`);
       })
-      .catch(() => {/* silent – no resume available */});
+      .catch(() => {});
   }, []);
 
   function scrambleTo(target: string) {
@@ -54,7 +52,6 @@ export function HeroResume() {
     if (!el) return;
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
     let iteration = 0;
-    const len = target.length;
     function step() {
       if (!el) return;
       el.textContent = target
@@ -65,7 +62,7 @@ export function HeroResume() {
           return SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
         })
         .join("");
-      if (iteration < len) {
+      if (iteration < target.length) {
         iteration += 0.5;
         frameRef.current = requestAnimationFrame(step);
       } else {
@@ -75,25 +72,26 @@ export function HeroResume() {
     frameRef.current = requestAnimationFrame(step);
   }
 
-  if (!href) return null;
+  const Tag = href ? "a" : "span";
+  const linkProps = href
+    ? { href, target: "_blank", rel: "noopener noreferrer" }
+    : {};
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sys-label opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 group"
+    <Tag
+      {...linkProps}
+      className="sys-label opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 cursor-pointer"
       onMouseEnter={() => { setHovered(true); scrambleTo(ORIGINAL); }}
       onMouseLeave={() => { setHovered(false); scrambleTo(ORIGINAL); }}
     >
       <span ref={labelRef}>{ORIGINAL}</span>
       <span
-        className="transition-all duration-200 overflow-hidden"
+        className="transition-all duration-200 overflow-hidden inline-block"
         style={{ width: hovered ? "1em" : 0, opacity: hovered ? 1 : 0 }}
         aria-hidden
       >
         ↗
       </span>
-    </a>
+    </Tag>
   );
 }

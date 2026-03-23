@@ -185,7 +185,7 @@ export function HeroSection({ name, taglineDark, taglineLight }: HeroSectionProp
   return (
     <section
       ref={heroSectionRef}
-      className="relative min-h-[70vh] overflow-hidden px-8 md:px-16 lg:px-24 pt-40 pb-16 mb-16"
+      className="relative min-h-[70vh] overflow-hidden px-8 md:px-16 lg:px-24 pt-40 pb-16"
     >
       {/* ASCII terrain background */}
       <AsciiHeroBg />
