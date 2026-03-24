@@ -71,6 +71,7 @@ export interface CMSWork {
   PublishDate: string | null
   Detail: string
   Cover: CMSMedia | null
+  Top: boolean | null
   createdAt: string
   publishedAt: string
 }

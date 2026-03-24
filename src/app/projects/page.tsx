@@ -9,7 +9,7 @@ import { TerminalPageHeader } from "@/components/terminal-page-header";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'IT Projects',
+  title: 'Projects',
   description: 'Exploring network security, virtualization, automation, and infrastructure projects',
 };
 
@@ -22,8 +22,8 @@ export default async function ProjectsPage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
         <TerminalPageHeader
           sysLabel={"// PROJECT.LOG"}
-          title="IT Projects"
-          subtitle="Homelab · Network Security · Automation"
+          title="Projects"
+          subtitle="Homelab · Network Security · Creative"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

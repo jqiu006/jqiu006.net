@@ -12,8 +12,8 @@ export const revalidate = 60;
 const quickLinks = [
   {
     href: "/projects",
-    title: "IT Projects",
-    description: "Homelab setups, network security, and automation",
+    title: "Projects",
+    description: "Homelab setups, network security, and creative project",
     icon: Code,
   },
   {
@@ -36,15 +36,7 @@ export default async function HomePage() {
     getAllCMSWorks(),
   ]);
   const recentProjects = projects.slice(0, 3);
-  const sortedWorks = [...works].sort((a, b) => {
-    const aDate = a.PublishDate;
-    const bDate = b.PublishDate;
-    if (aDate && bDate) return new Date(bDate).getTime() - new Date(aDate).getTime();
-    if (aDate && !bDate) return -1;
-    if (!aDate && bDate) return 1;
-    return 0;
-  });
-  const recentWorks = sortedWorks.slice(0, 4);
+  const recentWorks = works.filter((w) => w.Top === true);
 
   return (
     <div className="relative">

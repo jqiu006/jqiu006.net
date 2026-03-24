@@ -100,7 +100,7 @@ export default async function AboutPage() {
         <TerminalPageHeader
           sysLabel={"// ABOUT.SYS"}
           title="About Me"
-          subtitle="IT Professional · Security-Minded · Creative Technologist"
+          subtitle="Travel is for mountains and seas, and for all that remains in memory."
         />
 
         {/* Bio */}
