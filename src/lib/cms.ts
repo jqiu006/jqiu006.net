@@ -1,5 +1,5 @@
-const STRAPI_BASE_URL = process.env.STRAPI_BASE_URL || 'http://192.168.10.41:1337'
-const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || ''
+const STRAPI_BASE_URL = process.env.STRAPI_BASE_URL ?? ''
+const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN ?? ''
 
 // ─── Media ────────────────────────────────────────────────────────────────────
 
@@ -78,11 +78,44 @@ export interface CMSWork {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Resolve a Strapi media path (relative or absolute) to a full URL. */
+/**
+ * Resolve a Strapi media path to a proxied URL served by this Next.js app.
+ * Converts internal Strapi URLs (absolute or relative) to /strapi-media/...
+ * so the browser never needs direct access to the internal network.
+ */
 export function getStrapiMediaUrl(path: string): string {
   if (!path) return ''
-  if (path.startsWith('http')) return path
-  return `${STRAPI_BASE_URL}${path}`
+  // Already an absolute URL pointing to Strapi — extract just the /uploads/... part
+  if (path.startsWith('http')) {
+    try {
+      const url = new URL(path)
+      if (url.pathname.startsWith('/uploads/')) {
+        return `/strapi-media/${url.pathname.slice('/uploads/'.length)}`
+      }
+    } catch {
+      // fall through
+    }
+    return path
+  }
+  // Relative path like /uploads/foo.jpg
+  if (path.startsWith('/uploads/')) {
+    return `/strapi-media/${path.slice('/uploads/'.length)}`
+  }
+  return path
+}
+
+/**
+ * Replace all internal Strapi media URLs inside a rich-text/markdown string
+ * with proxied /strapi-media/... URLs so embedded images and videos load for
+ * users outside the internal network.
+ */
+export function proxyStrapiUrls(content: string): string {
+  if (!content) return content
+  // Match http(s)://host:port/uploads/... — replace with /strapi-media/...
+  return content.replace(
+    /https?:\/\/[^/\s"')]+\/uploads\/([^\s"')]+)/g,
+    '/strapi-media/$1'
+  )
 }
 
 /** Return the best thumbnail URL for a cover image. */
@@ -145,7 +178,9 @@ export async function getCMSProjectById(documentId: string): Promise<CMSProject 
     const data = await fetchCMS<{ data: CMSProject[] }>(
       `projects?filters[documentId][$eq]=${documentId}&populate=*`
     )
-    return data.data[0] ?? null
+    const item = data.data[0] ?? null
+    if (item) item.Detail = proxyStrapiUrls(item.Detail)
+    return item
   } catch {
     return null
   }
@@ -171,7 +206,9 @@ export async function getCMSTechNoteById(documentId: string): Promise<CMSTechNot
     const data = await fetchCMS<{ data: CMSTechNote[] }>(
       `technotes?filters[documentId][$eq]=${documentId}&populate=*`
     )
-    return data.data[0] ?? null
+    const item = data.data[0] ?? null
+    if (item) item.Note = proxyStrapiUrls(item.Note)
+    return item
   } catch {
     return null
   }
@@ -197,7 +234,9 @@ export async function getCMSWorkById(documentId: string): Promise<CMSWork | null
     const data = await fetchCMS<{ data: CMSWork[] }>(
       `works?filters[documentId][$eq]=${documentId}&populate=*`
     )
-    return data.data[0] ?? null
+    const item = data.data[0] ?? null
+    if (item) item.Detail = proxyStrapiUrls(item.Detail)
+    return item
   } catch {
     return null
   }

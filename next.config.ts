@@ -1,16 +1,21 @@
 import type { NextConfig } from "next";
 
+const STRAPI_BASE_URL = process.env.STRAPI_BASE_URL ?? "";
+
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "192.168.10.41",
-        port: "1337",
-        pathname: "/uploads/**",
-      },
-    ],
+    unoptimized: true,
   },
+  ...(STRAPI_BASE_URL && {
+    async rewrites() {
+      return [
+        {
+          source: "/strapi-media/:path*",
+          destination: `${STRAPI_BASE_URL}/uploads/:path*`,
+        },
+      ];
+    },
+  }),
 };
 
 export default nextConfig;
