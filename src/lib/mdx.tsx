@@ -40,9 +40,19 @@ function MDXAnchor({ href, children, ...rest }: AnchorProps) {
   );
 }
 
+function MDXBlockquote({ children }: { children?: React.ReactNode }) {
+  return (
+    <blockquote className="not-prose my-6 border-l-4 border-accent bg-muted/30 px-4 py-3 font-mono text-sm text-muted-foreground italic">
+      <span className="text-accent select-none mr-2 not-italic">//</span>
+      {children}
+    </blockquote>
+  );
+}
+
 const mdxComponents = {
   a: MDXAnchor,
   pre: CodeBlock,
+  blockquote: MDXBlockquote,
 };
 
 const prettyCodeOptions = {
@@ -63,6 +73,7 @@ export async function MDXContent({ source }: MDXContentProps) {
       components: mdxComponents,
       options: {
         mdxOptions: {
+          format: 'md',
           remarkPlugins: [remarkGfm],
           rehypePlugins: [
             [rehypePrettyCode, prettyCodeOptions],
